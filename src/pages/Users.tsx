@@ -69,6 +69,8 @@ export const Users: React.FC = () => {
   const [filterGender, setFilterGender] = useState<string>('');
   const [filterActive, setFilterActive] = useState<string>('all');
   const [filterProfileComplete, setFilterProfileComplete] = useState<string>('all');
+  const [filterCity, setFilterCity] = useState<string>('');
+  const [filterProvince, setFilterProvince] = useState<string>('');
   const [sortField, setSortField] = useState<SortField>('id');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [showFilters, setShowFilters] = useState(false);
@@ -130,6 +132,8 @@ export const Users: React.FC = () => {
   // Obtener valores únicos para los filtros
   const categories = Array.from(new Set(users.map(u => u.category).filter(Boolean))) as string[];
   const genders = Array.from(new Set(users.map(u => u.gender).filter(Boolean))) as string[];
+  const cities = Array.from(new Set(users.map(u => u.city).filter(Boolean))) as string[];
+  const provinces = Array.from(new Set(users.map(u => u.province).filter(Boolean))) as string[];
 
   const filteredUsers = users
     .filter((user) => {
@@ -231,6 +235,9 @@ export const Users: React.FC = () => {
     setFilterGender('');
     setFilterActive('all');
     setFilterProfileComplete('all');
+    setFilterCity('');
+    setFilterProvince('');
+    setPage(0);
   };
 
   const handleEdit = (user: User) => {
@@ -389,7 +396,7 @@ export const Users: React.FC = () => {
             >
               Filtros
             </Button>
-            {(filterCategory || filterGender || filterActive !== 'all' || filterProfileComplete !== 'all') && (
+            {(filterCategory || filterGender || filterActive !== 'all' || filterProfileComplete !== 'all' || filterCity || filterProvince) && (
               <Button variant="outlined" onClick={clearFilters}>
                 Limpiar
               </Button>
@@ -458,6 +465,46 @@ export const Users: React.FC = () => {
                       <MenuItem value="all">Todos</MenuItem>
                       <MenuItem value="complete">Completos</MenuItem>
                       <MenuItem value="incomplete">Incompletos</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Ciudad</InputLabel>
+                    <Select
+                      value={filterCity}
+                      label="Ciudad"
+                      onChange={(e) => {
+                        setFilterCity(e.target.value);
+                        setPage(0);
+                      }}
+                    >
+                      <MenuItem value="">Todas</MenuItem>
+                      {cities.map((city) => (
+                        <MenuItem key={city} value={city}>
+                          {city}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Provincia</InputLabel>
+                    <Select
+                      value={filterProvince}
+                      label="Provincia"
+                      onChange={(e) => {
+                        setFilterProvince(e.target.value);
+                        setPage(0);
+                      }}
+                    >
+                      <MenuItem value="">Todas</MenuItem>
+                      {provinces.map((province) => (
+                        <MenuItem key={province} value={province}>
+                          {province}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid>

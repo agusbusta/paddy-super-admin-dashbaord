@@ -14,6 +14,8 @@ export interface User {
   is_admin?: boolean;
   is_super_admin?: boolean;
   club_id?: number;
+  city?: string;
+  province?: string;
   created_at?: string;
   updated_at?: string;
 }
