@@ -56,7 +56,7 @@ import {
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { userService, User, UserUpdate } from '../services/users';
-import { georefService, Provincia, Localidad } from '../services/georef';
+import { georefService } from '../services/georef';
 import { colors } from '../utils/constants';
 import { exportToCSV, exportToExcel, mapUsersForExport } from '../utils/export';
 import toast from 'react-hot-toast';
@@ -188,6 +188,12 @@ export const Users: React.FC = () => {
       // Filtro por perfil completo
       if (filterProfileComplete === 'complete' && !user.is_profile_complete) return false;
       if (filterProfileComplete === 'incomplete' && user.is_profile_complete) return false;
+
+      // Filtro por provincia
+      if (filterProvince && user.province !== filterProvince) return false;
+
+      // Filtro por ciudad
+      if (filterCity && user.city !== filterCity) return false;
 
       return true;
     })
