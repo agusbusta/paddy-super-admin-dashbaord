@@ -8,6 +8,8 @@ import {
   Chip,
   Grid,
   IconButton,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -16,50 +18,40 @@ import {
   Business as BusinessIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from 'react-query';
+import { pregameTurnService } from '../services/pregameTurns';
 import { colors } from '../utils/constants';
 
 // Tipo para los datos de reserva
 interface Reservation {
-  id: string;
-  clubName: string;
-  fieldNumber: number;
-  time: string;
-  status: 'complete' | 'incomplete';
+  id: number;
+  club_name?: string;
+  court_name?: string;
   date: string;
+  start_time: string;
+  end_time?: string;
+  status: string;
+  players_count?: number;
 }
 
-// Datos de ejemplo (después se reemplazarán con datos reales de la API)
-const mockReservations: Reservation[] = [
-  {
-    id: '1',
-    clubName: 'Club Paddio Central',
-    fieldNumber: 1,
-    time: '10:00 - 11:00',
-    status: 'complete',
-    date: '2024-03-20',
-  },
-  {
-    id: '2',
-    clubName: 'Club Paddio Central',
-    fieldNumber: 2,
-    time: '11:00 - 12:00',
-    status: 'incomplete',
-    date: '2024-03-20',
-  },
-  {
-    id: '3',
-    clubName: 'Club Paddio Norte',
-    fieldNumber: 1,
-    time: '15:00 - 16:00',
-    status: 'complete',
-    date: '2024-03-20',
-  },
-];
-
 const ReservationCard: React.FC<{ reservation: Reservation }> = ({ reservation }) => {
-  const getStatusColor = (status: Reservation['status']) => {
-    return status === 'complete' ? colors.success : colors.warning;
+  const getStatusColor = (status: string) => {
+    if (status === 'READY_TO_PLAY' || status === 'COMPLETED') return colors.success;
+    if (status === 'CANCELLED') return colors.error;
+    return colors.warning;
   };
+
+  const getStatusLabel = (status: string) => {
+    if (status === 'READY_TO_PLAY') return 'Listo para jugar';
+    if (status === 'COMPLETED') return 'Completo';
+    if (status === 'CANCELLED') return 'Cancelado';
+    if (status === 'PENDING') return 'Pendiente';
+    return status;
+  };
+
+  const timeRange = reservation.end_time 
+    ? `${reservation.start_time} - ${reservation.end_time}`
+    : reservation.start_time;
 
   return (
     <Card sx={{ mb: 2 }}>
@@ -69,13 +61,13 @@ const ReservationCard: React.FC<{ reservation: Reservation }> = ({ reservation }
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <BusinessIcon sx={{ color: colors.primary }} />
               <Typography variant="subtitle1" fontWeight="bold">
-                {reservation.clubName}
+                {reservation.club_name || 'Sin club'}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <SportsIcon sx={{ color: colors.primary }} />
               <Typography variant="body2" color="text.secondary">
-                Cancha {reservation.fieldNumber}
+                {reservation.court_name || 'Sin cancha'}
               </Typography>
             </Box>
           </Grid>
@@ -83,18 +75,25 @@ const ReservationCard: React.FC<{ reservation: Reservation }> = ({ reservation }
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <AccessTimeIcon sx={{ color: colors.primary }} />
               <Typography variant="body2" color="text.secondary">
-                {reservation.time}
+                {timeRange}
               </Typography>
             </Box>
-            <Chip
-              label={reservation.status === 'complete' ? 'Completo' : 'A completar'}
-              size="small"
-              sx={{
-                backgroundColor: `${getStatusColor(reservation.status)}20`,
-                color: getStatusColor(reservation.status),
-                fontWeight: 600,
-              }}
-            />
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Chip
+                label={getStatusLabel(reservation.status)}
+                size="small"
+                sx={{
+                  backgroundColor: `${getStatusColor(reservation.status)}20`,
+                  color: getStatusColor(reservation.status),
+                  fontWeight: 600,
+                }}
+              />
+              {reservation.players_count !== undefined && (
+                <Typography variant="caption" color="text.secondary">
+                  {reservation.players_count}/4 jugadores
+                </Typography>
+              )}
+            </Box>
           </Grid>
         </Grid>
       </CardContent>
@@ -104,6 +103,27 @@ const ReservationCard: React.FC<{ reservation: Reservation }> = ({ reservation }
 
 export const ReservationsByClub: React.FC = () => {
   const navigate = useNavigate();
+
+  const { data: reservations = [], isLoading, error } = useQuery(
+    'all-reservations',
+    () => pregameTurnService.getPregameTurns({ limit: 1000 }),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  // Agrupar reservas por club
+  const reservationsByClub = React.useMemo(() => {
+    const grouped: { [clubName: string]: Reservation[] } = {};
+    reservations.forEach((reservation) => {
+      const clubName = reservation.club_name || 'Sin club';
+      if (!grouped[clubName]) {
+        grouped[clubName] = [];
+      }
+      grouped[clubName].push(reservation);
+    });
+    return Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b));
+  }, [reservations]);
 
   return (
     <Container maxWidth="xl">
@@ -116,9 +136,29 @@ export const ReservationsByClub: React.FC = () => {
         </Typography>
       </Box>
 
-      {mockReservations.map((reservation) => (
-        <ReservationCard key={reservation.id} reservation={reservation} />
-      ))}
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error">Error al cargar las reservas</Alert>
+      ) : reservationsByClub.length === 0 ? (
+        <Alert severity="info">No hay reservas registradas</Alert>
+      ) : (
+        reservationsByClub.map(([clubName, clubReservations]) => (
+          <Box key={clubName} sx={{ mb: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <BusinessIcon sx={{ color: colors.primary }} />
+              <Typography variant="h6" fontWeight="bold">
+                {clubName} ({clubReservations.length} reservas)
+              </Typography>
+            </Box>
+            {clubReservations.map((reservation) => (
+              <ReservationCard key={reservation.id} reservation={reservation} />
+            ))}
+          </Box>
+        ))
+      )}
     </Container>
   );
 }; 

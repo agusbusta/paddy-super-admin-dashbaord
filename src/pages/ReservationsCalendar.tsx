@@ -39,8 +39,14 @@ export const ReservationsCalendar: React.FC = () => {
   const { data: reservations = [], isLoading } = useQuery(
     ['reservations-calendar', year, month],
     async () => {
-      // Por ahora retornamos array vacío hasta que tengamos el endpoint
-      return [];
+      const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+      return await pregameTurnService.getPregameTurns({ 
+        start_date: startDate,
+        end_date: endDate,
+        limit: 10000 
+      });
     },
     {
       refetchOnWindowFocus: false,

@@ -27,8 +27,12 @@ export interface PregameTurnFilters {
 export const pregameTurnService = {
   getPregameTurns: async (filters?: PregameTurnFilters): Promise<PregameTurn[]> => {
     try {
-      const response = await api.get<PregameTurn[]>('/pregame-turns/', { params: filters });
-      return Array.isArray(response.data) ? response.data : [];
+      const response = await api.get<any>('/pregame-turns/all', { params: filters });
+      // El endpoint devuelve { reservations: [], total, skip, limit }
+      if (response.data && response.data.reservations) {
+        return Array.isArray(response.data.reservations) ? response.data.reservations : [];
+      }
+      return [];
     } catch (error: any) {
       console.error('❌ Error fetching pregame turns:', error);
       return [];

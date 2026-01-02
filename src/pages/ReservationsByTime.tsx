@@ -9,6 +9,8 @@ import {
   Grid,
   IconButton,
   Divider,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -17,62 +19,35 @@ import {
   Business as BusinessIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from 'react-query';
+import { pregameTurnService } from '../services/pregameTurns';
 import { colors } from '../utils/constants';
 
 // Tipo para los datos de reserva
 interface Reservation {
-  id: string;
-  clubName: string;
-  fieldNumber: number;
-  time: string;
-  status: 'complete' | 'incomplete';
+  id: number;
+  club_name?: string;
+  court_name?: string;
   date: string;
+  start_time: string;
+  end_time?: string;
+  status: string;
+  players_count?: number;
 }
 
-// Datos de ejemplo (después se reemplazarán con datos reales de la API)
-const mockReservations: Reservation[] = [
-  {
-    id: '1',
-    clubName: 'Club Paddio Central',
-    fieldNumber: 1,
-    time: '10:00 - 11:00',
-    status: 'complete',
-    date: '2024-03-20',
-  },
-  {
-    id: '2',
-    clubName: 'Club Paddio Central',
-    fieldNumber: 2,
-    time: '10:00 - 11:00',
-    status: 'incomplete',
-    date: '2024-03-20',
-  },
-  {
-    id: '3',
-    clubName: 'Club Paddio Norte',
-    fieldNumber: 1,
-    time: '11:00 - 12:00',
-    status: 'complete',
-    date: '2024-03-20',
-  },
-];
-
-// Agrupar reservas por horario
-const groupReservationsByTime = (reservations: Reservation[]) => {
-  const grouped = reservations.reduce((acc, reservation) => {
-    if (!acc[reservation.time]) {
-      acc[reservation.time] = [];
-    }
-    acc[reservation.time].push(reservation);
-    return acc;
-  }, {} as Record<string, Reservation[]>);
-
-  return Object.entries(grouped).sort(([timeA], [timeB]) => timeA.localeCompare(timeB));
-};
-
 const ReservationCard: React.FC<{ reservation: Reservation }> = ({ reservation }) => {
-  const getStatusColor = (status: Reservation['status']) => {
-    return status === 'complete' ? colors.success : colors.warning;
+  const getStatusColor = (status: string) => {
+    if (status === 'READY_TO_PLAY' || status === 'COMPLETED') return colors.success;
+    if (status === 'CANCELLED') return colors.error;
+    return colors.warning;
+  };
+
+  const getStatusLabel = (status: string) => {
+    if (status === 'READY_TO_PLAY') return 'Listo para jugar';
+    if (status === 'COMPLETED') return 'Completo';
+    if (status === 'CANCELLED') return 'Cancelado';
+    if (status === 'PENDING') return 'Pendiente';
+    return status;
   };
 
   return (
@@ -83,26 +58,33 @@ const ReservationCard: React.FC<{ reservation: Reservation }> = ({ reservation }
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <BusinessIcon sx={{ color: colors.primary }} />
               <Typography variant="subtitle1" fontWeight="bold">
-                {reservation.clubName}
+                {reservation.club_name || 'Sin club'}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <SportsIcon sx={{ color: colors.primary }} />
               <Typography variant="body2" color="text.secondary">
-                Cancha {reservation.fieldNumber}
+                {reservation.court_name || 'Sin cancha'}
               </Typography>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <Chip
-              label={reservation.status === 'complete' ? 'Completo' : 'A completar'}
-              size="small"
-              sx={{
-                backgroundColor: `${getStatusColor(reservation.status)}20`,
-                color: getStatusColor(reservation.status),
-                fontWeight: 600,
-              }}
-            />
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Chip
+                label={getStatusLabel(reservation.status)}
+                size="small"
+                sx={{
+                  backgroundColor: `${getStatusColor(reservation.status)}20`,
+                  color: getStatusColor(reservation.status),
+                  fontWeight: 600,
+                }}
+              />
+              {reservation.players_count !== undefined && (
+                <Typography variant="caption" color="text.secondary">
+                  {reservation.players_count}/4 jugadores
+                </Typography>
+              )}
+            </Box>
           </Grid>
         </Grid>
       </CardContent>
@@ -110,10 +92,41 @@ const ReservationCard: React.FC<{ reservation: Reservation }> = ({ reservation }
   );
 };
 
+// Agrupar reservas por horario
+const groupReservationsByTime = (reservations: Reservation[]) => {
+  const grouped = reservations.reduce((acc, reservation) => {
+    const timeKey = reservation.end_time 
+      ? `${reservation.start_time} - ${reservation.end_time}`
+      : reservation.start_time;
+    if (!acc[timeKey]) {
+      acc[timeKey] = [];
+    }
+    acc[timeKey].push(reservation);
+    return acc;
+  }, {} as Record<string, Reservation[]>);
+
+  return Object.entries(grouped).sort(([timeA], [timeB]) => {
+    // Ordenar por hora de inicio
+    const timeAStart = timeA.split(' - ')[0];
+    const timeBStart = timeB.split(' - ')[0];
+    return timeAStart.localeCompare(timeBStart);
+  });
+};
+
 export const ReservationsByTime: React.FC = () => {
   const navigate = useNavigate();
 
-  const groupedReservations = groupReservationsByTime(mockReservations);
+  const { data: reservations = [], isLoading, error } = useQuery(
+    'all-reservations',
+    () => pregameTurnService.getPregameTurns({ limit: 1000 }),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const groupedReservations = React.useMemo(() => {
+    return groupReservationsByTime(reservations);
+  }, [reservations]);
 
   return (
     <Container maxWidth="xl">
@@ -126,20 +139,30 @@ export const ReservationsByTime: React.FC = () => {
         </Typography>
       </Box>
 
-      {groupedReservations.map(([time, reservations]) => (
-        <Box key={time} sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <AccessTimeIcon sx={{ color: colors.primary }} />
-            <Typography variant="h6" fontWeight="bold">
-              {time}
-            </Typography>
-          </Box>
-          <Divider sx={{ mb: 2 }} />
-          {reservations.map((reservation) => (
-            <ReservationCard key={reservation.id} reservation={reservation} />
-          ))}
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+          <CircularProgress />
         </Box>
-      ))}
+      ) : error ? (
+        <Alert severity="error">Error al cargar las reservas</Alert>
+      ) : groupedReservations.length === 0 ? (
+        <Alert severity="info">No hay reservas registradas</Alert>
+      ) : (
+        groupedReservations.map(([time, timeReservations]) => (
+          <Box key={time} sx={{ mb: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <AccessTimeIcon sx={{ color: colors.primary }} />
+              <Typography variant="h6" fontWeight="bold">
+                {time} ({timeReservations.length} reservas)
+              </Typography>
+            </Box>
+            <Divider sx={{ mb: 2 }} />
+            {timeReservations.map((reservation) => (
+              <ReservationCard key={reservation.id} reservation={reservation} />
+            ))}
+          </Box>
+        ))
+      )}
     </Container>
   );
 }; 
