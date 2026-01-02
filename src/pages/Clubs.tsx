@@ -981,7 +981,23 @@ export const Clubs: React.FC = () => {
             ))}
           </Grid>
           {filteredClubs.length > rowsPerPage && (
-            <MuiBox sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+            <MuiBox sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4, mb: 2, flexWrap: 'wrap', gap: 2 }}>
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Items por página</InputLabel>
+                <Select
+                  value={rowsPerPage}
+                  label="Items por página"
+                  onChange={(e) => {
+                    setRowsPerPage(Number(e.target.value));
+                    setPage(0);
+                  }}
+                >
+                  <MenuItem value={6}>6</MenuItem>
+                  <MenuItem value={12}>12</MenuItem>
+                  <MenuItem value={24}>24</MenuItem>
+                  <MenuItem value={48}>48</MenuItem>
+                </Select>
+              </FormControl>
               <Pagination
                 count={Math.ceil(filteredClubs.length / rowsPerPage)}
                 page={page + 1}
@@ -991,6 +1007,9 @@ export const Clubs: React.FC = () => {
                 showFirstButton
                 showLastButton
               />
+              <Typography variant="body2" color="text.secondary">
+                Mostrando {page * rowsPerPage + 1}-{Math.min((page + 1) * rowsPerPage, filteredClubs.length)} de {filteredClubs.length}
+              </Typography>
             </MuiBox>
           )}
         </>
