@@ -1,6 +1,7 @@
 /**
- * Utilidades para exportar datos a CSV
+ * Utilidades para exportar datos a CSV y Excel
  */
+import * as XLSX from 'xlsx';
 
 export interface ExportOptions {
   filename?: string;
@@ -168,4 +169,58 @@ export function mapMatchesForExport(matches: any[]): any[] {
     'Creador': match.creator_name || match.creator_email || '',
     'Fecha de Creación': match.created_at ? new Date(match.created_at).toLocaleDateString('es-AR') : '',
   }));
+}
+
+/**
+ * Exporta datos a Excel (XLSX) y descarga el archivo
+ */
+export function exportToExcel(
+  data: any[],
+  options: ExportOptions = {}
+): void {
+  const { filename = 'export' } = options;
+
+  if (!data || data.length === 0) {
+    console.warn('No hay datos para exportar');
+    return;
+  }
+
+  // Crear un libro de trabajo
+  const wb = XLSX.utils.book_new();
+
+  // Convertir los datos a una hoja de trabajo
+  const ws = XLSX.utils.json_to_sheet(data);
+
+  // Ajustar el ancho de las columnas
+  const maxWidth = 50;
+  const colWidths = Object.keys(data[0]).map((key) => {
+    const headerLength = key.length;
+    const maxDataLength = Math.max(
+      ...data.map((row) => String(row[key] || '').length)
+    );
+    return { wch: Math.min(Math.max(headerLength, maxDataLength) + 2, maxWidth) };
+  });
+  ws['!cols'] = colWidths;
+
+  // Agregar la hoja al libro
+  XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+
+  // Generar el archivo Excel
+  const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+  // Crear blob y descargar
+  const blob = new Blob([excelBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+
+  // Limpiar
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }

@@ -33,6 +33,9 @@ import {
   Grid,
   Tabs,
   Tab,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -48,11 +51,12 @@ import {
   History as HistoryIcon,
   Info as InfoIcon,
   FileDownload as FileDownloadIcon,
+  PictureAsPdf as PictureAsPdfIcon,
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { userService, User, UserUpdate } from '../services/users';
 import { colors } from '../utils/constants';
-import { exportToCSV, mapUsersForExport } from '../utils/export';
+import { exportToCSV, exportToExcel, mapUsersForExport } from '../utils/export';
 import toast from 'react-hot-toast';
 
 type SortField = 'id' | 'name' | 'email' | 'category' | 'gender' | 'is_active';
@@ -72,6 +76,7 @@ export const Users: React.FC = () => {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [detailTab, setDetailTab] = useState(0);
   const [editForm, setEditForm] = useState<UserUpdate>({});
+  const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading, error, refetch } = useQuery(
@@ -297,17 +302,45 @@ export const Users: React.FC = () => {
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             startIcon={<FileDownloadIcon />}
-            onClick={() => {
-              const exportData = mapUsersForExport(filteredUsers);
-              exportToCSV(exportData, { filename: `usuarios_${new Date().toISOString().split('T')[0]}` });
-              toast.success('Datos exportados exitosamente');
-            }}
+            onClick={(e) => setExportMenuAnchor(e.currentTarget)}
             variant="outlined"
             sx={{ borderColor: colors.primary, color: colors.primary }}
             disabled={filteredUsers.length === 0}
           >
-            Exportar CSV
+            Exportar
           </Button>
+          <Menu
+            anchorEl={exportMenuAnchor}
+            open={Boolean(exportMenuAnchor)}
+            onClose={() => setExportMenuAnchor(null)}
+          >
+            <MenuItem
+              onClick={() => {
+                const exportData = mapUsersForExport(filteredUsers);
+                exportToCSV(exportData, { filename: `usuarios_${new Date().toISOString().split('T')[0]}` });
+                toast.success('Datos exportados a CSV exitosamente');
+                setExportMenuAnchor(null);
+              }}
+            >
+              <ListItemIcon>
+                <FileDownloadIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Exportar a CSV</ListItemText>
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                const exportData = mapUsersForExport(filteredUsers);
+                exportToExcel(exportData, { filename: `usuarios_${new Date().toISOString().split('T')[0]}` });
+                toast.success('Datos exportados a Excel exitosamente');
+                setExportMenuAnchor(null);
+              }}
+            >
+              <ListItemIcon>
+                <PictureAsPdfIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Exportar a Excel</ListItemText>
+            </MenuItem>
+          </Menu>
           <Button startIcon={<RefreshIcon />} onClick={() => refetch()}>
             Actualizar
           </Button>

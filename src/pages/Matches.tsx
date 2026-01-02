@@ -33,6 +33,8 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Menu,
+  ListItemIcon,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -48,7 +50,7 @@ import { useQuery } from 'react-query';
 import { matchService, Match } from '../services/matches';
 import { clubService } from '../services/clubs';
 import { colors } from '../utils/constants';
-import { exportToCSV, mapMatchesForExport } from '../utils/export';
+import { exportToCSV, exportToExcel, mapMatchesForExport } from '../utils/export';
 import toast from 'react-hot-toast';
 
 const MATCH_STATUSES = [
@@ -68,6 +70,7 @@ export const Matches: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
 
   const { data: matches = [], isLoading, error, refetch } = useQuery(
     ['matches', filterStatus, filterClub, filterStartDate, filterEndDate],
@@ -187,18 +190,51 @@ export const Matches: React.FC = () => {
           <Button
             startIcon={<FileDownloadIcon />}
             variant="outlined"
-            onClick={() => {
-              if (filteredMatches.length === 0) {
-                toast.error('No hay partidos para exportar');
-                return;
-              }
-              const mappedData = mapMatchesForExport(filteredMatches);
-              exportToCSV(mappedData, { filename: `partidos_${new Date().toISOString().split('T')[0]}` });
-              toast.success(`Se exportaron ${filteredMatches.length} partidos`);
-            }}
+            onClick={(e) => setExportMenuAnchor(e.currentTarget)}
+            disabled={filteredMatches.length === 0}
           >
-            Exportar CSV
+            Exportar
           </Button>
+          <Menu
+            anchorEl={exportMenuAnchor}
+            open={Boolean(exportMenuAnchor)}
+            onClose={() => setExportMenuAnchor(null)}
+          >
+            <MenuItem
+              onClick={() => {
+                if (filteredMatches.length === 0) {
+                  toast.error('No hay partidos para exportar');
+                  return;
+                }
+                const mappedData = mapMatchesForExport(filteredMatches);
+                exportToCSV(mappedData, { filename: `partidos_${new Date().toISOString().split('T')[0]}` });
+                toast.success(`Se exportaron ${filteredMatches.length} partidos a CSV`);
+                setExportMenuAnchor(null);
+              }}
+            >
+              <ListItemIcon>
+                <FileDownloadIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Exportar a CSV</ListItemText>
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                if (filteredMatches.length === 0) {
+                  toast.error('No hay partidos para exportar');
+                  return;
+                }
+                const mappedData = mapMatchesForExport(filteredMatches);
+                exportToExcel(mappedData, { filename: `partidos_${new Date().toISOString().split('T')[0]}` });
+                toast.success(`Se exportaron ${filteredMatches.length} partidos a Excel`);
+                setExportMenuAnchor(null);
+              }}
+            >
+              <ListItemIcon>
+                <FileDownloadIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Exportar a Excel</ListItemText>
+            </MenuItem>
+          </Menu>
           <Button startIcon={<RefreshIcon />} onClick={() => refetch()}>
             Actualizar
           </Button>

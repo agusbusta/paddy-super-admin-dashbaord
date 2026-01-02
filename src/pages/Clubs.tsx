@@ -39,6 +39,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Menu,
 } from '@mui/material';
 import {
   SportsHandball as SportsIcon,
@@ -59,7 +60,7 @@ import { clubService, Club, ClubCreate, ClubUpdate } from '../services/clubs';
 import { adminService } from '../services/admin';
 import { Admin } from '../types/admin';
 import { colors } from '../utils/constants';
-import { exportToCSV, mapClubsForExport } from '../utils/export';
+import { exportToCSV, exportToExcel, mapClubsForExport } from '../utils/export';
 import toast from 'react-hot-toast';
 
 const ClubCard: React.FC<{ club: Club; onClick: () => void }> = ({ club, onClick }) => {
@@ -701,6 +702,7 @@ export const Clubs: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
 
   const queryClient = useQueryClient();
 
@@ -832,17 +834,45 @@ export const Clubs: React.FC = () => {
         <Box>
           <Button
             startIcon={<FileDownloadIcon />}
-            onClick={() => {
-              const exportData = mapClubsForExport(filteredClubs);
-              exportToCSV(exportData, { filename: `clubs_${new Date().toISOString().split('T')[0]}` });
-              toast.success('Datos exportados exitosamente');
-            }}
+            onClick={(e) => setExportMenuAnchor(e.currentTarget)}
             variant="outlined"
             sx={{ mr: 1, borderColor: colors.primary, color: colors.primary }}
             disabled={filteredClubs.length === 0}
           >
-            Exportar CSV
+            Exportar
           </Button>
+          <Menu
+            anchorEl={exportMenuAnchor}
+            open={Boolean(exportMenuAnchor)}
+            onClose={() => setExportMenuAnchor(null)}
+          >
+            <MenuItem
+              onClick={() => {
+                const exportData = mapClubsForExport(filteredClubs);
+                exportToCSV(exportData, { filename: `clubs_${new Date().toISOString().split('T')[0]}` });
+                toast.success('Datos exportados a CSV exitosamente');
+                setExportMenuAnchor(null);
+              }}
+            >
+              <ListItemIcon>
+                <FileDownloadIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Exportar a CSV</ListItemText>
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                const exportData = mapClubsForExport(filteredClubs);
+                exportToExcel(exportData, { filename: `clubs_${new Date().toISOString().split('T')[0]}` });
+                toast.success('Datos exportados a Excel exitosamente');
+                setExportMenuAnchor(null);
+              }}
+            >
+              <ListItemIcon>
+                <FileDownloadIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Exportar a Excel</ListItemText>
+            </MenuItem>
+          </Menu>
           <Button
             startIcon={<RefreshIcon />}
             onClick={handleRefresh}

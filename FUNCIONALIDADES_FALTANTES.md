@@ -274,8 +274,11 @@
 15. ✅ **Exportar matches a CSV** (agregar exportación de partidos)
 16. ✅ **Mejorar dashboard con estadísticas de matches y notificaciones** (agregar métricas y secciones detalladas)
 
+### ✅ COMPLETADO (Continuación)
+17. ✅ **Exportación a Excel** (soporte adicional para formato XLSX con menú desplegable)
+
 ### 🟡 Baja Prioridad
-17. **Exportación a Excel** (soporte adicional para formato XLSX)
+18. **Mejoras adicionales** (paginación, más filtros, etc.)
 
 ---
 
