@@ -13,6 +13,7 @@ import {
   Chip,
   ToggleButton,
   ToggleButtonGroup,
+  Avatar,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -37,6 +38,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { statisticsService } from '../services/statistics';
+import { adminService } from '../services/admin';
 import { colors } from '../utils/constants';
 
 interface StatCard {
@@ -53,6 +55,10 @@ export const Dashboard: React.FC = () => {
   const { data: usersByMonth = [], isLoading: isLoadingUsersByMonth } = useQuery(
     'users-by-month',
     () => statisticsService.getUsersByMonth(12)
+  );
+  const { data: superAdmins = [], isLoading: isLoadingSuperAdmins } = useQuery(
+    'super-admins',
+    adminService.getSuperAdmins
   );
 
   const [chartFilter, setChartFilter] = React.useState<'todos' | 'jugadores' | 'administradores'>('todos');
@@ -93,23 +99,23 @@ export const Dashboard: React.FC = () => {
           title: 'Total Usuarios',
           value: stats.users.total,
           icon: <PersonIcon />,
-          color: colors.primary,
-          bgColor: `${colors.primary}15`,
-        },
-        {
+      color: colors.primary,
+      bgColor: `${colors.primary}15`,
+    },
+    {
           title: 'Usuarios Activos',
           value: stats.users.active,
-          icon: <CheckIcon />,
-          color: colors.secondary,
-          bgColor: `${colors.secondary}15`,
+      icon: <CheckIcon />,
+      color: colors.secondary,
+      bgColor: `${colors.secondary}15`,
           subtitle: `${stats.users.inactive} inactivos`,
-        },
-        {
+    },
+    {
           title: 'Total Clubs',
           value: stats.clubs.total,
-          icon: <PlaceIcon />,
-          color: colors.accent,
-          bgColor: `${colors.accent}15`,
+      icon: <PlaceIcon />,
+      color: colors.accent,
+      bgColor: `${colors.accent}15`,
           subtitle: `${stats.clubs.active} activos`,
         },
         {
@@ -194,53 +200,53 @@ export const Dashboard: React.FC = () => {
         ) : (
           statsCards.map((stat, index) => (
             <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: 2,
-                  boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+            <Card 
+              elevation={0}
+              sx={{ 
+                borderRadius: 2, 
+                boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
                   height: '100%',
                   transition: 'transform 0.2s',
                   '&:hover': {
                     transform: 'translateY(-4px)',
                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                   },
-                }}
-              >
-                <CardContent>
+              }}
+            >
+              <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                         width: 48,
                         height: 48,
-                        borderRadius: '50%',
-                        backgroundColor: stat.bgColor,
-                        color: stat.color,
-                        mr: 2,
-                      }}
-                    >
-                      {stat.icon}
-                    </Box>
+                      borderRadius: '50%',
+                      backgroundColor: stat.bgColor,
+                      color: stat.color,
+                      mr: 2,
+                    }}
+                  >
+                    {stat.icon}
+                  </Box>
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="h4" component="div" fontWeight="bold">
-                        {stat.value}
-                      </Typography>
+                    <Typography variant="h4" component="div" fontWeight="bold">
+                      {stat.value}
+                    </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {stat.title}
-                      </Typography>
+                      {stat.title}
+                    </Typography>
                       {stat.subtitle && (
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
                           {stat.subtitle}
                         </Typography>
                       )}
                     </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
           ))
         )}
       </Grid>
@@ -253,11 +259,11 @@ export const Dashboard: React.FC = () => {
         <Grid container spacing={3}>
           {/* Gráfico de Usuarios Nuevos */}
           <Grid item xs={12} md={8}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                borderRadius: 2,
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                borderRadius: 2, 
                 boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
                 height: '100%',
               }}
@@ -265,7 +271,7 @@ export const Dashboard: React.FC = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6" color={colors.primary} fontWeight="bold">
                   Usuarios Nuevos por Mes
-                </Typography>
+              </Typography>
                 <ToggleButtonGroup
                   value={chartFilter}
                   exclusive
@@ -334,11 +340,11 @@ export const Dashboard: React.FC = () => {
 
           {/* Estadísticas de Usuarios */}
           <Grid item xs={12} md={4}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                borderRadius: 2,
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                borderRadius: 2, 
                 boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
                 height: '100%',
               }}
@@ -355,15 +361,15 @@ export const Dashboard: React.FC = () => {
                 <Box sx={{ mt: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Box
-                        sx={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: '50%',
-                          backgroundColor: colors.secondary,
+                    <Box 
+                      sx={{ 
+                        width: 10, 
+                        height: 10, 
+                        borderRadius: '50%', 
+                        backgroundColor: colors.secondary, 
                           mr: 1,
-                        }}
-                      />
+                      }} 
+                    />
                       <Typography variant="body2">Activos:</Typography>
                     </Box>
                     <Typography variant="body2" fontWeight="bold">
@@ -371,13 +377,13 @@ export const Dashboard: React.FC = () => {
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Box
-                        sx={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: '50%',
-                          backgroundColor: colors.error,
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box 
+                      sx={{ 
+                        width: 10, 
+                        height: 10, 
+                        borderRadius: '50%', 
+                        backgroundColor: colors.error, 
                           mr: 1,
                         }}
                       />
@@ -560,7 +566,86 @@ export const Dashboard: React.FC = () => {
             </Paper>
           </Grid>
         </Grid>
+
+        {/* Sección de Super Administradores */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, borderRadius: 2, boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <PersonIcon sx={{ color: colors.primary, fontSize: 28 }} />
+              <Typography variant="h5" fontWeight="bold" sx={{ color: colors.primary }}>
+                Super Administradores
+              </Typography>
+            </Box>
+            {isLoadingSuperAdmins ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                <CircularProgress />
+              </Box>
+            ) : superAdmins.length === 0 ? (
+              <Alert severity="info">No hay super administradores registrados.</Alert>
+            ) : (
+              <Grid container spacing={2}>
+                {superAdmins.map((superAdmin: any) => (
+                  <Grid item xs={12} sm={6} md={4} key={superAdmin.id}>
+                    <Card
+                      sx={{
+                        p: 2,
+                        backgroundColor: superAdmin.is_active ? `${colors.primary}08` : `${colors.error}08`,
+                        border: `1px solid ${superAdmin.is_active ? colors.primary : colors.error}30`,
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: superAdmin.is_active ? colors.primary : colors.error,
+                            width: 48,
+                            height: 48,
+                          }}
+                        >
+                          {superAdmin.name?.charAt(0)?.toUpperCase() || 'A'}
+                        </Avatar>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {superAdmin.name} {superAdmin.last_name || ''}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {superAdmin.email}
+                          </Typography>
+                          {superAdmin.phone && (
+                            <Typography variant="body2" color="text.secondary">
+                              {superAdmin.phone}
+                            </Typography>
+                          )}
+                          <Box sx={{ mt: 1 }}>
+                            <Chip
+                              label={superAdmin.is_active ? 'Activo' : 'Inactivo'}
+                              size="small"
+                              sx={{
+                                backgroundColor: superAdmin.is_active ? `${colors.success}20` : `${colors.error}20`,
+                                color: superAdmin.is_active ? colors.success : colors.error,
+                                fontWeight: 600,
+                              }}
+                            />
+                            <Chip
+                              label="Super Admin"
+                              size="small"
+                              sx={{
+                                ml: 1,
+                                backgroundColor: `${colors.primary}20`,
+                                color: colors.primary,
+                                fontWeight: 600,
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Paper>
+        </Grid>
       </Box>
     </Container>
   );
-};
+}; 

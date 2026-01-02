@@ -42,4 +42,14 @@ export const adminService = {
     const response = await api.patch<AdminResponse>(`/users/admins/${id}/toggle-status`);
     return response.data.admin;
   },
+
+  getSuperAdmins: async (): Promise<any[]> => {
+    try {
+      const response = await api.get<{ super_admins: any[] }>('/users/super-admins');
+      return response.data.super_admins || [];
+    } catch (error: any) {
+      console.error('❌ Error fetching super admins:', error);
+      return [];
+    }
+  },
 }; 
