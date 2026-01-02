@@ -3,6 +3,7 @@ import { clubService } from './clubs';
 import { adminService } from './admin';
 import { matchService } from './matches';
 import { notificationService } from './notifications';
+import { courtService } from './courts';
 
 export interface DashboardStatistics {
   users: {
@@ -235,6 +236,82 @@ export const statisticsService = {
       }));
     } catch (error) {
       console.error('Error getting users by month:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Obtener distribución de categorías de usuarios
+   */
+  getUsersByCategory: async (): Promise<Array<{ category: string; count: number }>> => {
+    try {
+      const users = await userService.getUsers({ limit: 10000 });
+      const categoryCount: { [key: string]: number } = {};
+
+      users.forEach((user) => {
+        const category = user.category || 'Sin categoría';
+        categoryCount[category] = (categoryCount[category] || 0) + 1;
+      });
+
+      return Object.entries(categoryCount)
+        .map(([category, count]) => ({ category, count }))
+        .sort((a, b) => b.count - a.count);
+    } catch (error) {
+      console.error('Error getting users by category:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Obtener distribución de usuarios por provincia
+   */
+  getUsersByProvince: async (): Promise<Array<{ province: string; count: number }>> => {
+    try {
+      const users = await userService.getUsers({ limit: 10000 });
+      const provinceCount: { [key: string]: number } = {};
+
+      users.forEach((user) => {
+        if (user.province) {
+          provinceCount[user.province] = (provinceCount[user.province] || 0) + 1;
+        }
+      });
+
+      return Object.entries(provinceCount)
+        .map(([province, count]) => ({ province, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10); // Top 10 provincias
+    } catch (error) {
+      console.error('Error getting users by province:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Obtener estadísticas de canchas por club
+   */
+  getCourtsByClub: async (): Promise<Array<{ clubName: string; courtsCount: number; clubId: number }>> => {
+    try {
+      const [clubs, courts] = await Promise.all([
+        clubService.getClubs({ limit: 1000 }),
+        courtService.getCourts({ limit: 10000 }),
+      ]);
+
+      // Agrupar canchas por club
+      const courtsByClub: { [clubId: number]: number } = {};
+      courts.forEach((court) => {
+        courtsByClub[court.club_id] = (courtsByClub[court.club_id] || 0) + 1;
+      });
+
+      // Mapear a formato con nombre de club
+      return clubs
+        .map((club) => ({
+          clubName: club.name,
+          courtsCount: courtsByClub[club.id] || 0,
+          clubId: club.id,
+        }))
+        .sort((a, b) => b.courtsCount - a.courtsCount);
+    } catch (error) {
+      console.error('Error getting courts by club:', error);
       return [];
     }
   },

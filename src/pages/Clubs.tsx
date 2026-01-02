@@ -61,6 +61,7 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { clubService, Club, ClubCreate, ClubUpdate } from '../services/clubs';
 import { adminService } from '../services/admin';
 import { Admin } from '../types/admin';
+import { courtService } from '../services/courts';
 import { colors } from '../utils/constants';
 import { exportToCSV, exportToExcel, mapClubsForExport } from '../utils/export';
 import toast from 'react-hot-toast';
@@ -157,6 +158,15 @@ const ClubModal: React.FC<{
 }> = ({ club, onClose, onEdit, onDelete }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const { data: courts = [], isLoading: isLoadingCourts } = useQuery(
+    ['courts', club?.id],
+    () => courtService.getCourtsByClub(club!.id),
+    {
+      enabled: !!club?.id,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   if (!club) return null;
 
@@ -295,6 +305,67 @@ const ClubModal: React.FC<{
             </ListItem>
           )}
         </List>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
+          Canchas ({courts.length})
+        </Typography>
+        {isLoadingCourts ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : courts.length === 0 ? (
+          <Alert severity="info">Este club no tiene canchas registradas.</Alert>
+        ) : (
+          <Grid container spacing={2}>
+            {courts.map((court) => (
+              <Grid item xs={12} sm={6} key={court.id}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    border: `1px solid ${colors.background}`,
+                    borderRadius: 2,
+                    '&:hover': {
+                      borderColor: colors.primary,
+                    },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {court.name}
+                    </Typography>
+                    <Chip
+                      label={court.is_available ? 'Disponible' : 'No disponible'}
+                      size="small"
+                      sx={{
+                        backgroundColor: court.is_available ? `${colors.success}20` : `${colors.error}20`,
+                        color: court.is_available ? colors.success : colors.error,
+                      }}
+                    />
+                  </Box>
+                  {court.description && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      {court.description}
+                    </Typography>
+                  )}
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                    {court.is_indoor && (
+                      <Chip label="Cubierta" size="small" variant="outlined" />
+                    )}
+                    {court.has_lighting && (
+                      <Chip label="Con iluminación" size="small" variant="outlined" />
+                    )}
+                    {court.surface_type && (
+                      <Chip label={court.surface_type} size="small" variant="outlined" />
+                    )}
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Box>
     </Modal>
   );

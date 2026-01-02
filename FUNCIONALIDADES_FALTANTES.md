@@ -356,20 +356,23 @@
 ### ✅ COMPLETADO (Continuación)
 20. ✅ **Filtro por tipo de partido mixto/regular** (filtro en página de Matches)
 
-### 🟡 Mejoras Futuras (Baja Prioridad)
-1. **Gráficos adicionales en dashboard:**
+### ✅ COMPLETADO (Mejoras Futuras Implementadas)
+1. ✅ **Gráficos adicionales en dashboard:**
+   - ✅ Distribución de categorías (PieChart)
+   - ✅ Gráfico de usuarios por provincia (BarChart - Top 10)
+   - ✅ Gráfico de canchas por club (BarChart)
+2. ✅ **Vista detallada de canchas** por club (implementada en modal de club)
+3. ✅ **Estadísticas específicas:**
+   - ✅ Canchas totales por club (gráfico en dashboard)
+
+### 🟡 Mejoras Futuras Opcionales (Muy Baja Prioridad)
+1. **Gráficos adicionales:**
    - Turnos por día/club (si se decide incluir)
    - Tasa de cancelación
-   - Distribución de categorías
-   - Gráfico de usuarios por provincia/ciudad
-2. **Vista detallada de canchas** por club
-3. **Estadísticas específicas:**
-   - Clubs por región/ciudad
-   - Canchas totales por club
    - Mapa de distribución geográfica de usuarios
-4. **Mejoras de UX:**
-   - Búsqueda global en todas las secciones
-   - Filtros guardados/predefinidos
+2. **Mejoras de UX:**
+   - Búsqueda global en todas las secciones (cada página ya tiene búsqueda propia)
+   - Filtros guardados/predefinidos (requiere persistencia en localStorage)
    - Vista de calendario para reservas
 
 ---

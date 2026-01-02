@@ -32,6 +32,11 @@ import { useQuery } from 'react-query';
 import {
   LineChart,
   Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -61,6 +66,30 @@ export const Dashboard: React.FC = () => {
   const { data: superAdmins = [], isLoading: isLoadingSuperAdmins } = useQuery(
     'super-admins',
     adminService.getSuperAdmins
+  );
+  const { data: usersByCategory = [] } = useQuery(
+    'users-by-category',
+    () => statisticsService.getUsersByCategory(),
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 60, // Cache por 1 hora
+    }
+  );
+  const { data: usersByProvince = [] } = useQuery(
+    'users-by-province',
+    () => statisticsService.getUsersByProvince(),
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 60, // Cache por 1 hora
+    }
+  );
+  const { data: courtsByClub = [] } = useQuery(
+    'courts-by-club',
+    () => statisticsService.getCourtsByClub(),
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 60, // Cache por 1 hora
+    }
   );
 
   const [chartFilter, setChartFilter] = React.useState<'todos' | 'jugadores' | 'administradores'>('todos');
@@ -359,6 +388,140 @@ export const Dashboard: React.FC = () => {
                       />
                     )}
                   </LineChart>
+                </ResponsiveContainer>
+              )}
+            </Paper>
+          </Grid>
+
+          {/* Gráfico de Distribución de Categorías */}
+          <Grid item xs={12} md={4}>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                borderRadius: 2, 
+                boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+                height: '100%',
+              }}
+            >
+              <Typography variant="h6" color={colors.primary} fontWeight="bold" gutterBottom>
+                Distribución de Categorías
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              {usersByCategory.length === 0 ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No hay datos disponibles
+                  </Typography>
+                </Box>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={usersByCategory}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ category, percent }: any) => `${category}: ${((percent || 0) * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="count"
+                    >
+                      {usersByCategory.map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={[
+                          colors.primary,
+                          colors.secondary,
+                          colors.accent,
+                          colors.warning,
+                          colors.success,
+                          colors.error,
+                        ][index % 6]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </Paper>
+          </Grid>
+
+          {/* Gráfico de Usuarios por Provincia */}
+          <Grid item xs={12} md={6}>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                borderRadius: 2, 
+                boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+                height: '100%',
+              }}
+            >
+              <Typography variant="h6" color={colors.primary} fontWeight="bold" gutterBottom>
+                Usuarios por Provincia (Top 10)
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              {usersByProvince.length === 0 ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No hay datos disponibles
+                  </Typography>
+                </Box>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={usersByProvince}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="province" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={100}
+                      interval={0}
+                    />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill={colors.primary} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </Paper>
+          </Grid>
+
+          {/* Gráfico de Canchas por Club */}
+          <Grid item xs={12} md={6}>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                borderRadius: 2, 
+                boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+                height: '100%',
+              }}
+            >
+              <Typography variant="h6" color={colors.primary} fontWeight="bold" gutterBottom>
+                Canchas por Club
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              {courtsByClub.length === 0 ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No hay datos disponibles
+                  </Typography>
+                </Box>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={courtsByClub}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="clubName" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={100}
+                      interval={0}
+                    />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="courtsCount" fill={colors.accent} />
+                  </BarChart>
                 </ResponsiveContainer>
               )}
             </Paper>
