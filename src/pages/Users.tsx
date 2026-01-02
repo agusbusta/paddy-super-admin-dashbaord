@@ -269,6 +269,7 @@ export const Users: React.FC = () => {
   const handleViewDetails = (user: User) => {
     setSelectedUser(user);
     setDetailTab(0);
+    setReservationsPage(0);
     setDetailDialogOpen(true);
   };
 
