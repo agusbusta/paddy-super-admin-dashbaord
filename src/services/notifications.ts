@@ -13,6 +13,27 @@ export interface NotificationResponse {
   failed_count: number;
 }
 
+export interface BroadcastHistoryItem {
+  id: number;
+  user_id: number;
+  title: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  data?: {
+    from_admin?: string;
+    admin_name?: string;
+    category?: string;
+    only_active_users?: boolean;
+    target_users_count?: number;
+    users_with_tokens?: number;
+    sent_count?: number;
+    failed_count?: number;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BroadcastNotificationRequest extends NotificationRequest {
   category?: string;
   only_active_users?: boolean;
@@ -42,6 +63,14 @@ export const notificationService = {
     const response = await api.post<NotificationResponse>(
       `/notifications/send-to-user/${userId}`,
       notification
+    );
+    return response.data;
+  },
+
+  getBroadcastHistory: async (params?: { skip?: number; limit?: number }): Promise<BroadcastHistoryItem[]> => {
+    const response = await api.get<BroadcastHistoryItem[]>(
+      '/notifications/broadcast-history',
+      { params }
     );
     return response.data;
   },

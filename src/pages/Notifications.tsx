@@ -19,11 +19,23 @@ import {
 import {
   Send as SendIcon,
   Notifications as NotificationsIcon,
+  History as HistoryIcon,
 } from '@mui/icons-material';
-import { useMutation } from 'react-query';
-import { notificationService, BroadcastNotificationRequest } from '../services/notifications';
+import { useMutation, useQuery } from 'react-query';
+import { notificationService, BroadcastNotificationRequest, BroadcastHistoryItem } from '../services/notifications';
 import { colors } from '../utils/constants';
 import toast from 'react-hot-toast';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Tabs,
+  Tab,
+} from '@mui/material';
 
 const USER_CATEGORIES = [
   { value: '', label: 'Todas las categorías' },
@@ -43,6 +55,16 @@ export const Notifications: React.FC = () => {
   const [body, setBody] = useState('');
   const [category, setCategory] = useState<string>('');
   const [onlyActiveUsers, setOnlyActiveUsers] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const { data: history = [], isLoading: isLoadingHistory, refetch: refetchHistory } = useQuery(
+    'broadcast-history',
+    () => notificationService.getBroadcastHistory({ limit: 100 }),
+    {
+      enabled: activeTab === 1,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const sendMutation = useMutation(
     (data: BroadcastNotificationRequest) => notificationService.sendBroadcast(data),
@@ -55,6 +77,10 @@ export const Notifications: React.FC = () => {
         setTitle('');
         setBody('');
         setCategory('');
+        // Refrescar historial si está en esa pestaña
+        if (activeTab === 1) {
+          refetchHistory();
+        }
       },
       onError: (error: any) => {
         toast.error(error.response?.data?.detail || 'Error al enviar la notificación');
@@ -104,12 +130,19 @@ export const Notifications: React.FC = () => {
       <Paper
         elevation={0}
         sx={{
-          p: 4,
+          p: 2,
           borderRadius: 2,
           boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
         }}
       >
-        <form onSubmit={handleSubmit}>
+        <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)} sx={{ mb: 3 }}>
+          <Tab icon={<SendIcon />} label="Enviar Notificación" iconPosition="start" />
+          <Tab icon={<HistoryIcon />} label="Historial" iconPosition="start" />
+        </Tabs>
+
+        {activeTab === 0 && (
+          <Box sx={{ p: 2 }}>
+            <form onSubmit={handleSubmit}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
             Nueva Notificación
           </Typography>
@@ -212,9 +245,98 @@ export const Notifications: React.FC = () => {
             </Button>
           </Box>
         </form>
+          </Box>
+        )}
+
+        {activeTab === 1 && (
+          <Box sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+              Historial de Notificaciones Masivas
+            </Typography>
+
+            {isLoadingHistory ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : history.length === 0 ? (
+              <Alert severity="info">
+                No hay notificaciones masivas enviadas aún.
+              </Alert>
+            ) : (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell><strong>Fecha</strong></TableCell>
+                      <TableCell><strong>Título</strong></TableCell>
+                      <TableCell><strong>Mensaje</strong></TableCell>
+                      <TableCell><strong>Categoría</strong></TableCell>
+                      <TableCell><strong>Destinatarios</strong></TableCell>
+                      <TableCell><strong>Resultado</strong></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {history.map((item: BroadcastHistoryItem) => (
+                      <TableRow key={item.id} hover>
+                        <TableCell>
+                          {new Date(item.created_at).toLocaleString('es-AR', {
+                            dateStyle: 'short',
+                            timeStyle: 'short',
+                          })}
+                        </TableCell>
+                        <TableCell>{item.title}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ maxWidth: 300 }}>
+                            {item.message.length > 100
+                              ? `${item.message.substring(0, 100)}...`
+                              : item.message}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          {item.data?.category ? (
+                            <Chip label={item.data.category} size="small" />
+                          ) : (
+                            <Chip label="Todas" size="small" color="default" />
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {item.data?.users_with_tokens || 0} usuarios
+                            {item.data?.target_users_count && (
+                              <Typography variant="caption" display="block" color="text.secondary">
+                                de {item.data.target_users_count} totales
+                              </Typography>
+                            )}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Box>
+                            <Chip
+                              label={`${item.data?.sent_count || 0} enviadas`}
+                              size="small"
+                              color="success"
+                              sx={{ mr: 0.5 }}
+                            />
+                            {item.data?.failed_count && item.data.failed_count > 0 && (
+                              <Chip
+                                label={`${item.data.failed_count} fallidas`}
+                                size="small"
+                                color="error"
+                              />
+                            )}
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Box>
+        )}
       </Paper>
 
-      {sendMutation.data && (
+      {activeTab === 0 && sendMutation.data && (
         <Paper
           elevation={0}
           sx={{

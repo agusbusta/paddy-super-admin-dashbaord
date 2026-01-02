@@ -266,11 +266,12 @@
 ### ✅ COMPLETADO (Continuación)
 10. ✅ **Asignar administradores a clubs** (desde el formulario de creación/edición)
 11. ✅ **Exportación de datos a CSV** (exportar usuarios y clubs a CSV con filtros aplicados)
+12. ✅ **Historial de Notificaciones** (ver historial de notificaciones masivas enviadas con detalles)
 
 ### 🟡 Baja Prioridad
-12. **Exportación a Excel** (soporte adicional para formato XLSX)
-13. **Gestión de Matches** (ver partidos completados)
-14. **Historial de Notificaciones** (ver notificaciones enviadas anteriormente)
+13. **Exportación a Excel** (soporte adicional para formato XLSX)
+14. **Gestión de Matches** (ver partidos completados)
+15. **Filtros en historial de notificaciones** (filtrar por fecha, categoría, etc.)
 
 ---
 
@@ -301,10 +302,11 @@
    - Gráficos de actividad
    - Alertas y notificaciones importantes
 
-### 🟠 Fase 4: Notificaciones Globales - PENDIENTE
-1. Crear servicio `notifications.ts`
-2. Crear página para enviar notificaciones masivas
-3. Ver historial de notificaciones enviadas
+### ✅ Fase 4: Notificaciones Globales - COMPLETADA
+1. ✅ Crear servicio `notifications.ts`
+2. ✅ Crear página para enviar notificaciones masivas
+3. ✅ Ver historial de notificaciones enviadas
+4. ✅ Guardar historial en base de datos al enviar notificaciones masivas
 
 ### ✅ Fase 5: Mejoras y Optimizaciones - PARCIALMENTE COMPLETADA
 1. ✅ Mejorar gestión de usuarios (editar perfil completo, ver historial)
@@ -361,9 +363,10 @@
    - Ver historial de notificaciones
 
 ### 📊 Estado General
-- **Progreso:** ~85% de funcionalidades críticas completadas
+- **Progreso:** ~90% de funcionalidades críticas completadas
 - **Última actualización:** 2026-01-01
 - **Funcionalidades recientes:**
+  - ✅ Historial de notificaciones masivas (con detalles de envío)
   - ✅ Exportación de datos a CSV (usuarios y clubs)
   - ✅ Asignación de administradores a clubs
   - ✅ Mejoras en gestión de usuarios (historial, edición completa)
