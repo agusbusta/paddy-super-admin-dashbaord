@@ -774,6 +774,7 @@ export const Dashboard: React.FC = () => {
             </>
           )}
         </Grid>
+      </Box>
 
       {/* Sección de Super Administradores */}
       <Box sx={{ mt: 4 }}>
