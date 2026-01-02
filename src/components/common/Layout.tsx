@@ -22,7 +22,8 @@ import {
   ExitToApp as ExitToAppIcon, 
   Menu as MenuIcon,
   Place as PlaceIcon,
-  EventNote as EventIcon
+  EventNote as EventIcon,
+  Notifications as NotificationsIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -45,7 +46,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Administradores', icon: <PeopleIcon />, path: '/admins' },
+    { text: 'Usuarios', icon: <PeopleIcon />, path: '/users' },
     { text: 'Clubes', icon: <PlaceIcon />, path: '/clubs' },
+    { text: 'Notificaciones', icon: <NotificationsIcon />, path: '/notifications' },
     { text: 'Reservas', icon: <EventIcon />, path: '/reservations' },
   ];
 
@@ -68,7 +71,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Typography variant="h5" fontWeight="bold" sx={{ my: 2 }}>
           Paddio Admin
         </Typography>
-        {user && (
+        {user && user.name && (
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Avatar 
               sx={{ 
@@ -79,7 +82,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 mr: 1
               }}
             >
-              {user.name.charAt(0)}
+              {user.name.charAt(0).toUpperCase()}
             </Avatar>
             <Box>
               <Typography variant="subtitle1">{user.name}</Typography>

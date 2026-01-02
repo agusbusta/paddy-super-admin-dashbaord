@@ -205,10 +205,9 @@ export const AdminManagement: React.FC = () => {
           <Table>
             <TableHead sx={{ bgcolor: `${colors.primary}10` }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 'bold' }}>Nombre</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Club</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Teléfono</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Club</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Estado</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Fecha Creación</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', width: 150 }}>Acciones</TableCell>
@@ -220,7 +219,6 @@ export const AdminManagement: React.FC = () => {
                   <TableCell>{admin.name}</TableCell>
                   <TableCell>{admin.email}</TableCell>
                   <TableCell>{admin.phone || '-'}</TableCell>
-                  <TableCell>{admin.club_name || '-'}</TableCell>
                   <TableCell>
                     <Chip
                       label={admin.is_active ? 'Activo' : 'Inactivo'}

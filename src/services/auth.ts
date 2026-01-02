@@ -9,24 +9,45 @@ export const authService = {
     formData.append('password', credentials.password);
     formData.append('grant_type', 'password');
 
-    const response = await api.post<{ access_token: string; token_type: string }>('/auth/token', formData, {
+    const response = await api.post<{ access_token: string; token_type: string; user: any }>('/auth/token', formData, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
     // Guardar el token
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, response.data.access_token);
 
-    // Obtener perfil del usuario
-    const userResponse = await api.get<User>('/auth/me', {
-      headers: { Authorization: `Bearer ${response.data.access_token}` },
-    });
+    // El backend ya retorna el user en la respuesta del login
+    let userData: User;
+    if (response.data.user) {
+      userData = {
+        id: parseInt(response.data.user.id),
+        email: response.data.user.email,
+        name: response.data.user.name || '',
+        role: response.data.user.is_super_admin ? 'super_admin' : (response.data.user.is_admin ? 'admin' : 'user'),
+        phone: response.data.user.phoneNumber || null,
+        created_at: response.data.user.createdAt || new Date().toISOString(),
+      };
+    } else {
+      // Si no viene en el login, obtener del endpoint /me
+      const userResponse = await api.get<{ success: boolean; user: any }>('/auth/me');
+      const backendUser = userResponse.data.user;
+      userData = {
+        id: parseInt(backendUser.id),
+        email: backendUser.email,
+        name: backendUser.name || '',
+        role: backendUser.is_super_admin ? 'super_admin' : (backendUser.is_admin ? 'admin' : 'user'),
+        phone: backendUser.phoneNumber || null,
+        created_at: backendUser.createdAt || new Date().toISOString(),
+      };
+    }
 
     // Guardar datos del usuario
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userResponse.data));
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
 
     return {
-      ...response.data,
-      user: userResponse.data,
+      access_token: response.data.access_token,
+      token_type: response.data.token_type,
+      user: userData,
     };
   },
 
@@ -43,8 +64,17 @@ export const authService = {
     }
 
     // Si no está en localStorage, lo solicitamos
-    const response = await api.get<User>('/auth/me');
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(response.data));
-    return response.data;
+    const response = await api.get<{ success: boolean; user: any }>('/auth/me');
+    const backendUser = response.data.user;
+    const userData: User = {
+      id: parseInt(backendUser.id),
+      email: backendUser.email,
+      name: backendUser.name || '',
+      role: backendUser.is_super_admin ? 'super_admin' : (backendUser.is_admin ? 'admin' : 'user'),
+      phone: backendUser.phoneNumber || null,
+      created_at: backendUser.createdAt || new Date().toISOString(),
+    };
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+    return userData;
   },
 }; 

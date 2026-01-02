@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline } from '@mui/material';
+import { CssBaseline, Box, Alert, CircularProgress, Typography, Button } from '@mui/material';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './hooks/useAuth';
@@ -9,7 +9,9 @@ import { Layout } from './components/common/Layout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { AdminManagement } from './pages/AdminManagement';
+import { Users } from './pages/Users';
 import { Clubs } from './pages/Clubs';
+import { Notifications } from './pages/Notifications';
 import { Reservations } from './pages/Reservations';
 import { ReservationsByClub } from './pages/ReservationsByClub';
 import { ReservationsByTime } from './pages/ReservationsByTime';
@@ -86,20 +88,47 @@ const queryClient = new QueryClient({
 
 // Componente para rutas protegidas
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isSuperAdmin, logout } = useAuth();
 
   if (isLoading) {
-    return <div>Cargando...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Temporalmente eliminamos la validación de super_admin para permitir el acceso
-  // if (!isSuperAdmin) {
-  //   return <div>No tienes permisos para acceder a esta página</div>;
-  // }
+  // Solo super admins pueden acceder al dashboard
+  if (!isSuperAdmin) {
+    const handleLogout = () => {
+      logout();
+      window.location.href = '/login';
+    };
+
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', p: 4 }}>
+        <Alert severity="error" sx={{ mb: 2, maxWidth: 500 }}>
+          <Typography variant="h6" gutterBottom>
+            Acceso Denegado
+          </Typography>
+          <Typography variant="body1">
+            Solo los super administradores pueden acceder a este dashboard.
+          </Typography>
+        </Alert>
+        <Button
+          variant="contained"
+          onClick={handleLogout}
+          sx={{ mt: 2 }}
+        >
+          Cerrar Sesión
+        </Button>
+      </Box>
+    );
+  }
 
   return <Layout>{children}</Layout>;
 };
@@ -131,10 +160,26 @@ function AppRouter() {
         }
       />
       <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <Users />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/clubs"
         element={
           <ProtectedRoute>
             <Clubs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <Notifications />
           </ProtectedRoute>
         }
       />

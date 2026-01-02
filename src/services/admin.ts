@@ -3,8 +3,20 @@ import { Admin, CreateAdminData, UpdateAdminData, AdminsResponse, AdminResponse 
 
 export const adminService = {
   getAdmins: async (): Promise<Admin[]> => {
-    const response = await api.get<AdminsResponse>('/users/admins');
-    return response.data.admins || [];
+    try {
+      const response = await api.get<AdminsResponse>('/users/admins');
+      console.log('🔍 Admins response:', response.data);
+      const admins = response.data.admins || [];
+      console.log('✅ Returning admins:', admins.length);
+      return admins;
+    } catch (error: any) {
+      console.error('❌ Error fetching admins:', error);
+      if (error.response) {
+        console.error('❌ Error response:', error.response.data);
+        console.error('❌ Error status:', error.response.status);
+      }
+      return [];
+    }
   },
 
   getAdminById: async (id: number): Promise<Admin> => {
