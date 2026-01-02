@@ -591,10 +591,194 @@ export const Dashboard: React.FC = () => {
               ) : null}
             </Paper>
           </Grid>
+
+          {/* Estadísticas de Matches y Notificaciones */}
+          {stats && (stats.matches || stats.notifications) && (
+            <>
+              {/* Estadísticas de Matches */}
+              {stats.matches && (
+                <Grid item xs={12} md={6}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3,
+                      borderRadius: 2,
+                      boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+                      height: '100%',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <SportsIcon sx={{ color: colors.success, fontSize: 24 }} />
+                      <Typography variant="h6" color={colors.primary} fontWeight="bold">
+                        Partidos
+                      </Typography>
+                    </Box>
+                    <Divider sx={{ mb: 2 }} />
+                    <Box sx={{ mt: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              backgroundColor: colors.success,
+                              mr: 1,
+                            }}
+                          />
+                          <Typography variant="body2">Completados:</Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="bold">
+                          {stats.matches.completed} / {stats.matches.total}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              backgroundColor: colors.warning,
+                              mr: 1,
+                            }}
+                          />
+                          <Typography variant="body2">En Progreso:</Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="bold">
+                          {stats.matches.inProgress}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              backgroundColor: colors.primary,
+                              mr: 1,
+                            }}
+                          />
+                          <Typography variant="body2">Reservados:</Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="bold">
+                          {stats.matches.reserved}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2 }}>
+                        <Chip
+                          label={`${stats.matches.completedToday} hoy`}
+                          size="small"
+                          color="success"
+                          icon={<SportsIcon />}
+                        />
+                        <Chip
+                          label={`${stats.matches.completedLast7Days} en 7 días`}
+                          size="small"
+                          color="primary"
+                        />
+                        <Chip
+                          label={`${stats.matches.completedLast30Days} en 30 días`}
+                          size="small"
+                          color="secondary"
+                        />
+                      </Box>
+                    </Box>
+                  </Paper>
+                </Grid>
+              )}
+
+              {/* Estadísticas de Notificaciones */}
+              {stats.notifications && (
+                <Grid item xs={12} md={6}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3,
+                      borderRadius: 2,
+                      boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+                      height: '100%',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <NotificationsIcon sx={{ color: colors.primary, fontSize: 24 }} />
+                      <Typography variant="h6" color={colors.primary} fontWeight="bold">
+                        Notificaciones Masivas
+                      </Typography>
+                    </Box>
+                    <Divider sx={{ mb: 2 }} />
+                    <Box sx={{ mt: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <NotificationsIcon sx={{ color: colors.primary, fontSize: 20, mr: 1 }} />
+                          <Typography variant="body2">Total Enviadas:</Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="bold">
+                          {stats.notifications.totalBroadcasts}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              backgroundColor: colors.success,
+                              mr: 1,
+                            }}
+                          />
+                          <Typography variant="body2">Notificaciones Exitosas:</Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="bold">
+                          {stats.notifications.totalSent.toLocaleString('es-AR')}
+                        </Typography>
+                      </Box>
+                      {stats.notifications.totalFailed > 0 && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box
+                              sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: '50%',
+                                backgroundColor: colors.error,
+                                mr: 1,
+                              }}
+                            />
+                            <Typography variant="body2">Notificaciones Fallidas:</Typography>
+                          </Box>
+                          <Typography variant="body2" fontWeight="bold" color="error">
+                            {stats.notifications.totalFailed.toLocaleString('es-AR')}
+                          </Typography>
+                        </Box>
+                      )}
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2 }}>
+                        <Chip
+                          label={`${stats.notifications.sentLast7Days} en 7 días`}
+                          size="small"
+                          color="primary"
+                          icon={<NotificationsIcon />}
+                        />
+                        <Chip
+                          label={`${stats.notifications.sentLast30Days} en 30 días`}
+                          size="small"
+                          color="secondary"
+                        />
+                      </Box>
+                    </Box>
+                  </Paper>
+                </Grid>
+              )}
+            </>
+          )}
         </Grid>
 
-        {/* Sección de Super Administradores */}
-        <Grid item xs={12}>
+      {/* Sección de Super Administradores */}
+      <Box sx={{ mt: 4 }}>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
           <Paper sx={{ p: 3, borderRadius: 2, boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
               <PersonIcon sx={{ color: colors.primary, fontSize: 28 }} />
