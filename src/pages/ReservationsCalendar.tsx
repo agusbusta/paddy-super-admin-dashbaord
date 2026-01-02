@@ -181,21 +181,45 @@ export const ReservationsCalendar: React.FC = () => {
                 : '#ffffff',
               cursor: 'pointer',
               transition: 'background-color 0.15s ease',
+              position: 'relative',
               '&:hover': {
                 backgroundColor: selected 
                   ? '#bbdefb' 
                   : '#f5f5f5',
               },
+              '&:last-child': {
+                borderRight: '1px solid #e0e0e0',
+              },
             }}
           >
-            <Typography
-              variant="body2"
-              fontWeight={today || selected ? 'bold' : 'normal'}
-              color={today ? '#ff9800' : selected ? colors.primary : 'text.primary'}
-              sx={{ fontSize: '0.875rem', mb: 0.5 }}
-            >
-              {day}
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
+              <Typography
+                variant="body2"
+                fontWeight={today || selected ? 'bold' : 'normal'}
+                color={today ? '#ff9800' : selected ? colors.primary : 'text.primary'}
+                sx={{ fontSize: '0.875rem' }}
+              >
+                {day}
+              </Typography>
+              {dayReservations.length > 0 && (
+                <Box
+                  sx={{
+                    width: 18,
+                    height: 18,
+                    borderRadius: '50%',
+                    backgroundColor: colors.primary,
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.65rem',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {dayReservations.length}
+                </Box>
+              )}
+            </Box>
             {dayReservations.length > 0 && (
               <Box>
                 {dayReservations.slice(0, 2).map((res: any, idx: number) => (
@@ -204,19 +228,26 @@ export const ReservationsCalendar: React.FC = () => {
                     variant="caption"
                     sx={{
                       display: 'block',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      color: '#666',
                       fontSize: '0.7rem',
-                      color: 'text.secondary',
                       mb: 0.25,
                     }}
                   >
-                    {res.start_time}
+                    {res.start_time || 'Reserva'}
                   </Typography>
                 ))}
                 {dayReservations.length > 2 && (
                   <Typography 
                     variant="caption" 
-                    color="text.secondary"
-                    sx={{ fontSize: '0.65rem' }}
+                    sx={{ 
+                      fontSize: '0.65rem', 
+                      color: '#999',
+                      display: 'block',
+                      mt: 0.25,
+                    }}
                   >
                     +{dayReservations.length - 2}
                   </Typography>
@@ -242,7 +273,10 @@ export const ReservationsCalendar: React.FC = () => {
               borderRight: 'none',
               borderBottom: 'none',
               backgroundColor: '#fafafa',
-              opacity: 0.4,
+              opacity: 0.5,
+              '&:last-child': {
+                borderRight: '1px solid #e0e0e0',
+              },
             }}
           >
             <Typography variant="body2" color="text.disabled" sx={{ fontSize: '0.875rem' }}>
