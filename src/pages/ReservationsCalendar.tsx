@@ -193,36 +193,10 @@ export const ReservationsCalendar: React.FC = () => {
               variant="body2"
               fontWeight={today || selected ? 'bold' : 'normal'}
               color={today ? '#ff9800' : selected ? colors.primary : 'text.primary'}
-              sx={{ fontSize: '0.875rem', mb: 0.5 }}
+              sx={{ fontSize: '0.875rem' }}
             >
               {day}
             </Typography>
-            {dayReservations.length > 0 && (
-              <Box>
-                {dayReservations.slice(0, 3).map((res: any, idx: number) => (
-                  <Typography
-                    key={idx}
-                    variant="caption"
-                    sx={{
-                      display: 'block',
-                      fontSize: '0.7rem',
-                      color: '#666',
-                      mb: 0.25,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {res.start_time}
-                  </Typography>
-                ))}
-                {dayReservations.length > 3 && (
-                  <Typography variant="caption" sx={{ fontSize: '0.65rem', color: '#999' }}>
-                    +{dayReservations.length - 3}
-                  </Typography>
-                )}
-              </Box>
-            )}
           </Box>
         </Grid>
       );
