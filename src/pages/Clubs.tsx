@@ -40,6 +40,8 @@ import {
   Select,
   MenuItem,
   Menu,
+  Pagination,
+  Box as MuiBox,
 } from '@mui/material';
 import {
   SportsHandball as SportsIcon,
@@ -703,6 +705,8 @@ export const Clubs: React.FC = () => {
   const [filterActive, setFilterActive] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(12);
 
   const queryClient = useQueryClient();
 
@@ -783,9 +787,20 @@ export const Clubs: React.FC = () => {
     return true;
   });
 
+  // Calcular clubs paginados
+  const paginatedClubs = filteredClubs.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value - 1);
+  };
+
   const clearFilters = () => {
     setSearchTerm('');
     setFilterActive('all');
+    setPage(0);
   };
 
   if (isLoading) {
@@ -954,16 +969,31 @@ export const Clubs: React.FC = () => {
           No se encontraron clubs con los filtros aplicados.
         </Alert>
       ) : (
-        <Grid container spacing={3}>
-          {filteredClubs.map((club) => (
-            <Grid item xs={12} sm={6} md={4} key={club.id}>
-              <ClubCard
-                club={club}
-                onClick={() => setSelectedClub(club)}
+        <>
+          <Grid container spacing={3}>
+            {paginatedClubs.map((club) => (
+              <Grid item xs={12} sm={6} md={4} key={club.id}>
+                <ClubCard
+                  club={club}
+                  onClick={() => setSelectedClub(club)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          {filteredClubs.length > rowsPerPage && (
+            <MuiBox sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+              <Pagination
+                count={Math.ceil(filteredClubs.length / rowsPerPage)}
+                page={page + 1}
+                onChange={handleChangePage}
+                color="primary"
+                size="large"
+                showFirstButton
+                showLastButton
               />
-            </Grid>
-          ))}
-        </Grid>
+            </MuiBox>
+          )}
+        </>
       )}
 
       <ClubModal

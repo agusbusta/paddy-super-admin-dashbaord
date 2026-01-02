@@ -35,6 +35,7 @@ import {
   Divider,
   Menu,
   ListItemIcon,
+  TablePagination,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -71,6 +72,8 @@ export const Matches: React.FC = () => {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
 
   const { data: matches = [], isLoading, error, refetch } = useQuery(
     ['matches', filterStatus, filterClub, filterStartDate, filterEndDate],
@@ -100,12 +103,28 @@ export const Matches: React.FC = () => {
     return true;
   });
 
+  // Calcular matches paginados
+  const paginatedMatches = filteredMatches.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const clearFilters = () => {
     setSearchTerm('');
     setFilterStatus('');
     setFilterClub('');
     setFilterStartDate('');
     setFilterEndDate('');
+    setPage(0);
   };
 
   const getStatusColor = (status: string) => {
@@ -363,7 +382,7 @@ export const Matches: React.FC = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredMatches.map((match) => (
+                paginatedMatches.map((match) => (
                   <TableRow key={match.id} hover>
                     <TableCell>{match.id}</TableCell>
                     <TableCell>
@@ -426,6 +445,17 @@ export const Matches: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={filteredMatches.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          labelRowsPerPage="Filas por página:"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
+        />
       </Card>
 
       {/* Dialog de detalles */}

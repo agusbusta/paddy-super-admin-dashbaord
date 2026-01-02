@@ -36,6 +36,7 @@ import {
   Menu,
   ListItemIcon,
   ListItemText,
+  TablePagination,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -77,6 +78,8 @@ export const Users: React.FC = () => {
   const [detailTab, setDetailTab] = useState(0);
   const [editForm, setEditForm] = useState<UserUpdate>({});
   const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading, error, refetch } = useQuery(
@@ -192,6 +195,21 @@ export const Users: React.FC = () => {
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
+
+  // Calcular usuarios paginados
+  const paginatedUsers = filteredUsers.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -504,7 +522,7 @@ export const Users: React.FC = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUsers.map((user) => (
+                paginatedUsers.map((user) => (
                   <TableRow key={user.id} hover>
                     <TableCell>{user.id}</TableCell>
                     <TableCell>
@@ -584,6 +602,17 @@ export const Users: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={filteredUsers.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          labelRowsPerPage="Filas por página:"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
+        />
       </Card>
 
       {/* Dialog de edición */}
