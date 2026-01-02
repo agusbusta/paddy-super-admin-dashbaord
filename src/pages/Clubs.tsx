@@ -52,10 +52,14 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   FilterList as FilterListIcon,
+  FileDownload as FileDownloadIcon,
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { clubService, Club, ClubCreate, ClubUpdate } from '../services/clubs';
+import { adminService } from '../services/admin';
+import { Admin } from '../types/admin';
 import { colors } from '../utils/constants';
+import { exportToCSV, mapClubsForExport } from '../utils/export';
 import toast from 'react-hot-toast';
 
 const ClubCard: React.FC<{ club: Club; onClick: () => void }> = ({ club, onClick }) => {
@@ -317,11 +321,24 @@ const ClubFormDialog: React.FC<{
     saturday_open: true,
     sunday_open: true,
     courts_count: 1,
+    admin_user_id: undefined,
   });
   const [isActive, setIsActive] = useState(club?.is_active !== false);
   const [activeStep, setActiveStep] = useState(0);
 
   const queryClient = useQueryClient();
+
+  // Obtener lista de administradores disponibles (solo para creación)
+  const { data: admins = [] } = useQuery<Admin[]>(
+    'admins',
+    adminService.getAdmins,
+    {
+      enabled: !club, // Solo cargar si estamos creando un club nuevo
+    }
+  );
+
+  // Filtrar administradores que no tengan club asignado
+  const availableAdmins = admins.filter((admin: Admin) => !admin.club_id && admin.is_active);
 
   const createMutation = useMutation(
     (data: ClubCreate) => clubService.createClub(data),
@@ -389,6 +406,7 @@ const ClubFormDialog: React.FC<{
         saturday_open: formData.saturday_open !== false,
         sunday_open: formData.sunday_open !== false,
         courts_count: formData.courts_count || 1,
+        admin_user_id: formData.admin_user_id,
       };
       createMutation.mutate(createData);
     }
@@ -494,9 +512,26 @@ const ClubFormDialog: React.FC<{
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             fullWidth
             type="email"
-                    helperText="Email de contacto del club"
-                  />
-                  {club && (
+            helperText="Email de contacto del club"
+          />
+          {!club && availableAdmins.length > 0 && (
+            <FormControl fullWidth>
+              <InputLabel>Administrador (Opcional)</InputLabel>
+              <Select
+                value={formData.admin_user_id || ''}
+                label="Administrador (Opcional)"
+                onChange={(e) => setFormData({ ...formData, admin_user_id: e.target.value ? Number(e.target.value) : undefined })}
+              >
+                <MenuItem value="">Sin asignar</MenuItem>
+                {availableAdmins.map((admin: any) => (
+                  <MenuItem key={admin.id} value={admin.id}>
+                    {admin.name} {admin.email ? `(${admin.email})` : ''}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {club && (
                     <FormControlLabel
                       control={
                         <Switch
@@ -795,6 +830,19 @@ export const Clubs: React.FC = () => {
           </Typography>
         </Box>
         <Box>
+          <Button
+            startIcon={<FileDownloadIcon />}
+            onClick={() => {
+              const exportData = mapClubsForExport(filteredClubs);
+              exportToCSV(exportData, { filename: `clubs_${new Date().toISOString().split('T')[0]}` });
+              toast.success('Datos exportados exitosamente');
+            }}
+            variant="outlined"
+            sx={{ mr: 1, borderColor: colors.primary, color: colors.primary }}
+            disabled={filteredClubs.length === 0}
+          >
+            Exportar CSV
+          </Button>
           <Button
             startIcon={<RefreshIcon />}
             onClick={handleRefresh}

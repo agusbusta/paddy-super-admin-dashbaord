@@ -47,10 +47,12 @@ import {
   Visibility as VisibilityIcon,
   History as HistoryIcon,
   Info as InfoIcon,
+  FileDownload as FileDownloadIcon,
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { userService, User, UserUpdate } from '../services/users';
 import { colors } from '../utils/constants';
+import { exportToCSV, mapUsersForExport } from '../utils/export';
 import toast from 'react-hot-toast';
 
 type SortField = 'id' | 'name' | 'email' | 'category' | 'gender' | 'is_active';
@@ -292,9 +294,24 @@ export const Users: React.FC = () => {
             )}
           </Typography>
         </Box>
-        <Button startIcon={<RefreshIcon />} onClick={() => refetch()}>
-          Actualizar
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            startIcon={<FileDownloadIcon />}
+            onClick={() => {
+              const exportData = mapUsersForExport(filteredUsers);
+              exportToCSV(exportData, { filename: `usuarios_${new Date().toISOString().split('T')[0]}` });
+              toast.success('Datos exportados exitosamente');
+            }}
+            variant="outlined"
+            sx={{ borderColor: colors.primary, color: colors.primary }}
+            disabled={filteredUsers.length === 0}
+          >
+            Exportar CSV
+          </Button>
+          <Button startIcon={<RefreshIcon />} onClick={() => refetch()}>
+            Actualizar
+          </Button>
+        </Box>
       </Box>
 
       <Card sx={{ mb: 3 }}>
