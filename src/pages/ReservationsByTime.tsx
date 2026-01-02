@@ -345,20 +345,42 @@ export const ReservationsByTime: React.FC = () => {
         <Alert severity="info">No hay reservas con los filtros aplicados</Alert>
       ) : (
         <>
-          {paginatedTimeSlots.map(([time, timeReservations]) => (
-            <Box key={time} sx={{ mb: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <AccessTimeIcon sx={{ color: colors.primary }} />
-                <Typography variant="h6" fontWeight="bold">
-                  {time} ({timeReservations.length} reservas)
-                </Typography>
+          {paginatedTimeSlots.map(([time, timeReservations]) => {
+            const currentTimeSlotPage = getTimeSlotPage(time);
+            const totalTimeSlotPages = Math.ceil(timeReservations.length / reservationsPerTimeSlotPage);
+            const paginatedTimeReservations = timeReservations.slice(
+              currentTimeSlotPage * reservationsPerTimeSlotPage,
+              (currentTimeSlotPage + 1) * reservationsPerTimeSlotPage
+            );
+
+            return (
+              <Box key={time} sx={{ mb: 4 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <AccessTimeIcon sx={{ color: colors.primary }} />
+                  <Typography variant="h6" fontWeight="bold">
+                    {time} ({timeReservations.length} reservas)
+                  </Typography>
+                </Box>
+                <Divider sx={{ mb: 2 }} />
+                {paginatedTimeReservations.map((reservation) => (
+                  <ReservationCard key={reservation.id} reservation={reservation} />
+                ))}
+                {totalTimeSlotPages > 1 && (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                    <Pagination
+                      count={totalTimeSlotPages}
+                      page={currentTimeSlotPage + 1}
+                      onChange={(event, newPage) => setTimeSlotPage(time, newPage - 1)}
+                      color="primary"
+                      size="small"
+                      showFirstButton
+                      showLastButton
+                    />
+                  </Box>
+                )}
               </Box>
-              <Divider sx={{ mb: 2 }} />
-              {timeReservations.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))}
-            </Box>
-          ))}
+            );
+          })}
           {totalTimeSlots > rowsPerPage && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
               <Pagination

@@ -182,12 +182,21 @@ export const ReservationsByClub: React.FC = () => {
     return Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b));
   }, [filteredReservations]);
 
-  // Paginación
+  // Estado de paginación por club
+  const [clubPages, setClubPages] = React.useState<{ [clubName: string]: number }>({});
+  const reservationsPerClubPage = 10;
+
+  // Paginación de clubs
   const totalClubs = reservationsByClub.length;
   const paginatedClubs = reservationsByClub.slice(
     page * rowsPerPage,
     (page + 1) * rowsPerPage
   );
+
+  const getClubPage = (clubName: string) => clubPages[clubName] || 0;
+  const setClubPage = (clubName: string, newPage: number) => {
+    setClubPages((prev) => ({ ...prev, [clubName]: newPage }));
+  };
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -342,19 +351,43 @@ export const ReservationsByClub: React.FC = () => {
         <Alert severity="info">No hay reservas con los filtros aplicados</Alert>
       ) : (
         <>
-          {paginatedClubs.map(([clubName, clubReservations]) => (
-            <Box key={clubName} sx={{ mb: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <BusinessIcon sx={{ color: colors.primary }} />
-                <Typography variant="h6" fontWeight="bold">
-                  {clubName} ({clubReservations.length} reservas)
-                </Typography>
+          {paginatedClubs.map(([clubName, clubReservations]) => {
+            const currentClubPage = getClubPage(clubName);
+            const totalClubPages = Math.ceil(clubReservations.length / reservationsPerClubPage);
+            const paginatedClubReservations = clubReservations.slice(
+              currentClubPage * reservationsPerClubPage,
+              (currentClubPage + 1) * reservationsPerClubPage
+            );
+
+            return (
+              <Box key={clubName} sx={{ mb: 4 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BusinessIcon sx={{ color: colors.primary }} />
+                    <Typography variant="h6" fontWeight="bold">
+                      {clubName} ({clubReservations.length} reservas)
+                    </Typography>
+                  </Box>
+                </Box>
+                {paginatedClubReservations.map((reservation) => (
+                  <ReservationCard key={reservation.id} reservation={reservation} />
+                ))}
+                {totalClubPages > 1 && (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                    <Pagination
+                      count={totalClubPages}
+                      page={currentClubPage + 1}
+                      onChange={(event, newPage) => setClubPage(clubName, newPage - 1)}
+                      color="primary"
+                      size="small"
+                      showFirstButton
+                      showLastButton
+                    />
+                  </Box>
+                )}
               </Box>
-              {clubReservations.map((reservation) => (
-                <ReservationCard key={reservation.id} reservation={reservation} />
-              ))}
-            </Box>
-          ))}
+            );
+          })}
           {totalClubs > rowsPerPage && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
               <Pagination
