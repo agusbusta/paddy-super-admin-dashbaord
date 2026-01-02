@@ -1064,6 +1064,40 @@ export const Dashboard: React.FC = () => {
             )}
           </Paper>
           </Grid>
+
+          {/* Gráfico de Turnos por Día y Club */}
+          {turnsByDayClub.length > 0 && (
+            <Grid item xs={12}>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 3, 
+                  borderRadius: 2, 
+                  boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+                }}
+              >
+                <Typography variant="h6" color={colors.primary} fontWeight="bold" gutterBottom>
+                  Turnos por Día y Club (Últimos 30 días)
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={turnsByDayClub}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="date" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={100}
+                    />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill={colors.primary} name="Turnos" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Grid>
+          )}
         </Grid>
       </Box>
     </Container>
