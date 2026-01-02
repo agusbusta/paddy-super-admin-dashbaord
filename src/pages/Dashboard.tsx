@@ -25,6 +25,8 @@ import {
   Warning as WarningIcon,
   NewReleases as NewReleasesIcon,
   PersonAdd as PersonAddIcon,
+  SportsTennis as SportsIcon,
+  Notifications as NotificationsIcon,
 } from '@mui/icons-material';
 import { useQuery } from 'react-query';
 import {
@@ -142,6 +144,30 @@ export const Dashboard: React.FC = () => {
           bgColor: `${colors.accent}15`,
           subtitle: `${Math.round((stats.users.withCompleteProfile / stats.users.total) * 100)}% del total`,
         },
+        ...(stats.matches
+          ? [
+              {
+                title: 'Partidos Completados',
+                value: stats.matches.completed,
+                icon: <SportsIcon />,
+                color: colors.success,
+                bgColor: `${colors.success}15`,
+                subtitle: `${stats.matches.completedToday} hoy, ${stats.matches.completedLast7Days} en 7 días`,
+              },
+            ]
+          : []),
+        ...(stats.notifications
+          ? [
+              {
+                title: 'Notificaciones Enviadas',
+                value: stats.notifications.totalBroadcasts,
+                icon: <NotificationsIcon />,
+                color: colors.primary,
+                bgColor: `${colors.primary}15`,
+                subtitle: `${stats.notifications.sentLast7Days} en 7 días, ${stats.notifications.totalSent} totales`,
+              },
+            ]
+          : []),
       ]
     : [];
 
@@ -242,7 +268,7 @@ export const Dashboard: React.FC = () => {
                           {stat.subtitle}
                         </Typography>
                       )}
-                    </Box>
+                  </Box>
                 </Box>
               </CardContent>
             </Card>
