@@ -151,3 +151,21 @@ export function mapAdminsForExport(admins: any[]): any[] {
     'Fecha de Creación': admin.created_at ? new Date(admin.created_at).toLocaleDateString('es-AR') : '',
   }));
 }
+
+/**
+ * Mapea matches (partidos) para exportación
+ */
+export function mapMatchesForExport(matches: any[]): any[] {
+  return matches.map(match => ({
+    ID: match.id,
+    'Fecha y Hora': match.start_time ? new Date(match.start_time).toLocaleString('es-AR') : '',
+    Club: match.club_name || '',
+    Cancha: match.court_name || '',
+    Estado: match.status || '',
+    Resultado: match.score || 'Sin resultado',
+    'Jugadores': match.players?.map((p: any) => p.name).join(', ') || '',
+    'Cantidad de Jugadores': match.players?.length || 0,
+    'Creador': match.creator_name || match.creator_email || '',
+    'Fecha de Creación': match.created_at ? new Date(match.created_at).toLocaleDateString('es-AR') : '',
+  }));
+}

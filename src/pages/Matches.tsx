@@ -42,11 +42,13 @@ import {
   FilterList as FilterListIcon,
   Person as PersonIcon,
   Place as PlaceIcon,
+  FileDownload as FileDownloadIcon,
 } from '@mui/icons-material';
 import { useQuery } from 'react-query';
 import { matchService, Match } from '../services/matches';
 import { clubService } from '../services/clubs';
 import { colors } from '../utils/constants';
+import { exportToCSV, mapMatchesForExport } from '../utils/export';
 import toast from 'react-hot-toast';
 
 const MATCH_STATUSES = [
