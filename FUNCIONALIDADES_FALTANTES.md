@@ -267,11 +267,12 @@
 10. ✅ **Asignar administradores a clubs** (desde el formulario de creación/edición)
 11. ✅ **Exportación de datos a CSV** (exportar usuarios y clubs a CSV con filtros aplicados)
 12. ✅ **Historial de Notificaciones** (ver historial de notificaciones masivas enviadas con detalles)
+13. ✅ **Gestión de Matches** (ver partidos completados con filtros y detalles)
 
 ### 🟡 Baja Prioridad
-13. **Exportación a Excel** (soporte adicional para formato XLSX)
-14. **Gestión de Matches** (ver partidos completados)
+14. **Exportación a Excel** (soporte adicional para formato XLSX)
 15. **Filtros en historial de notificaciones** (filtrar por fecha, categoría, etc.)
+16. **Exportar matches a CSV** (agregar exportación de partidos)
 
 ---
 
@@ -363,9 +364,10 @@
    - Ver historial de notificaciones
 
 ### 📊 Estado General
-- **Progreso:** ~90% de funcionalidades críticas completadas
+- **Progreso:** ~95% de funcionalidades críticas completadas
 - **Última actualización:** 2026-01-01
 - **Funcionalidades recientes:**
+  - ✅ Gestión de partidos completados (ver matches con filtros y detalles)
   - ✅ Historial de notificaciones masivas (con detalles de envío)
   - ✅ Exportación de datos a CSV (usuarios y clubs)
   - ✅ Asignación de administradores a clubs

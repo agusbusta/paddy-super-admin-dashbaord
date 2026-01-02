@@ -12,6 +12,7 @@ import { AdminManagement } from './pages/AdminManagement';
 import { Users } from './pages/Users';
 import { Clubs } from './pages/Clubs';
 import { Notifications } from './pages/Notifications';
+import { Matches } from './pages/Matches';
 import { Reservations } from './pages/Reservations';
 import { ReservationsByClub } from './pages/ReservationsByClub';
 import { ReservationsByTime } from './pages/ReservationsByTime';
@@ -180,6 +181,14 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <Notifications />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/matches"
+        element={
+          <ProtectedRoute>
+            <Matches />
           </ProtectedRoute>
         }
       />

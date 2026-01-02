@@ -23,7 +23,8 @@ import {
   Menu as MenuIcon,
   Place as PlaceIcon,
   EventNote as EventIcon,
-  Notifications as NotificationsIcon
+  Notifications as NotificationsIcon,
+  SportsTennis as SportsIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -49,6 +50,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Usuarios', icon: <PeopleIcon />, path: '/users' },
     { text: 'Clubes', icon: <PlaceIcon />, path: '/clubs' },
     { text: 'Notificaciones', icon: <NotificationsIcon />, path: '/notifications' },
+    { text: 'Partidos', icon: <SportsIcon />, path: '/matches' },
     { text: 'Reservas', icon: <EventIcon />, path: '/reservations' },
   ];
 
