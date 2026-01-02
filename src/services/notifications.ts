@@ -39,6 +39,15 @@ export interface BroadcastNotificationRequest extends NotificationRequest {
   only_active_users?: boolean;
 }
 
+export interface BroadcastHistoryFilters {
+  skip?: number;
+  limit?: number;
+  category?: string;
+  start_date?: string;
+  end_date?: string;
+  admin_id?: number;
+}
+
 export const notificationService = {
   sendBroadcast: async (data: BroadcastNotificationRequest): Promise<NotificationResponse> => {
     const { category, only_active_users = true, ...notification } = data;
@@ -67,7 +76,7 @@ export const notificationService = {
     return response.data;
   },
 
-  getBroadcastHistory: async (params?: { skip?: number; limit?: number }): Promise<BroadcastHistoryItem[]> => {
+  getBroadcastHistory: async (params?: BroadcastHistoryFilters): Promise<BroadcastHistoryItem[]> => {
     const response = await api.get<BroadcastHistoryItem[]>(
       '/notifications/broadcast-history',
       { params }

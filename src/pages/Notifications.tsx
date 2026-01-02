@@ -15,11 +15,14 @@ import {
   Alert,
   CircularProgress,
   Divider,
+  Collapse,
+  Grid,
 } from '@mui/material';
 import {
   Send as SendIcon,
   Notifications as NotificationsIcon,
   History as HistoryIcon,
+  FilterList as FilterListIcon,
 } from '@mui/icons-material';
 import { useMutation, useQuery } from 'react-query';
 import { notificationService, BroadcastNotificationRequest, BroadcastHistoryItem } from '../services/notifications';
@@ -56,10 +59,20 @@ export const Notifications: React.FC = () => {
   const [category, setCategory] = useState<string>('');
   const [onlyActiveUsers, setOnlyActiveUsers] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
+  const [historyFilterCategory, setHistoryFilterCategory] = useState<string>('');
+  const [historyFilterStartDate, setHistoryFilterStartDate] = useState<string>('');
+  const [historyFilterEndDate, setHistoryFilterEndDate] = useState<string>('');
+  const [showHistoryFilters, setShowHistoryFilters] = useState(false);
 
   const { data: history = [], isLoading: isLoadingHistory, refetch: refetchHistory } = useQuery(
-    'broadcast-history',
-    () => notificationService.getBroadcastHistory({ limit: 100 }),
+    ['broadcast-history', historyFilterCategory, historyFilterStartDate, historyFilterEndDate],
+    () =>
+      notificationService.getBroadcastHistory({
+        limit: 100,
+        category: historyFilterCategory || undefined,
+        start_date: historyFilterStartDate || undefined,
+        end_date: historyFilterEndDate || undefined,
+      }),
     {
       enabled: activeTab === 1,
       refetchOnWindowFocus: false,
@@ -250,9 +263,80 @@ export const Notifications: React.FC = () => {
 
         {activeTab === 1 && (
           <Box sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-              Historial de Notificaciones Masivas
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Historial de Notificaciones Masivas
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant={showHistoryFilters ? 'contained' : 'outlined'}
+                  size="small"
+                  startIcon={<FilterListIcon />}
+                  onClick={() => setShowHistoryFilters(!showHistoryFilters)}
+                >
+                  Filtros
+                </Button>
+                {(historyFilterCategory || historyFilterStartDate || historyFilterEndDate) && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => {
+                      setHistoryFilterCategory('');
+                      setHistoryFilterStartDate('');
+                      setHistoryFilterEndDate('');
+                    }}
+                  >
+                    Limpiar
+                  </Button>
+                )}
+              </Box>
+            </Box>
+
+            <Collapse in={showHistoryFilters}>
+              <Paper sx={{ p: 2, mb: 2, backgroundColor: colors.background }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Categoría</InputLabel>
+                      <Select
+                        value={historyFilterCategory}
+                        label="Categoría"
+                        onChange={(e) => setHistoryFilterCategory(e.target.value)}
+                      >
+                        <MenuItem value="">Todas</MenuItem>
+                        {USER_CATEGORIES.filter((cat) => cat.value).map((cat) => (
+                          <MenuItem key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      label="Fecha Desde"
+                      type="date"
+                      value={historyFilterStartDate}
+                      onChange={(e) => setHistoryFilterStartDate(e.target.value)}
+                      fullWidth
+                      size="small"
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      label="Fecha Hasta"
+                      type="date"
+                      value={historyFilterEndDate}
+                      onChange={(e) => setHistoryFilterEndDate(e.target.value)}
+                      fullWidth
+                      size="small"
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Collapse>
 
             {isLoadingHistory ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
