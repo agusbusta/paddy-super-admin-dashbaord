@@ -183,9 +183,26 @@ export const Matches: React.FC = () => {
             )}
           </Typography>
         </Box>
-        <Button startIcon={<RefreshIcon />} onClick={() => refetch()}>
-          Actualizar
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            startIcon={<FileDownloadIcon />}
+            variant="outlined"
+            onClick={() => {
+              if (filteredMatches.length === 0) {
+                toast.error('No hay partidos para exportar');
+                return;
+              }
+              const mappedData = mapMatchesForExport(filteredMatches);
+              exportToCSV(mappedData, { filename: `partidos_${new Date().toISOString().split('T')[0]}` });
+              toast.success(`Se exportaron ${filteredMatches.length} partidos`);
+            }}
+          >
+            Exportar CSV
+          </Button>
+          <Button startIcon={<RefreshIcon />} onClick={() => refetch()}>
+            Actualizar
+          </Button>
+        </Box>
       </Box>
 
       <Card sx={{ mb: 3 }}>
