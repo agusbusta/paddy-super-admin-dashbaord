@@ -272,9 +272,10 @@
 ### ✅ COMPLETADO (Continuación)
 14. ✅ **Filtros en historial de notificaciones** (filtrar por fecha, categoría)
 15. ✅ **Exportar matches a CSV** (agregar exportación de partidos)
+16. ✅ **Mejorar dashboard con estadísticas de matches y notificaciones** (agregar métricas y secciones detalladas)
 
 ### 🟡 Baja Prioridad
-16. **Exportación a Excel** (soporte adicional para formato XLSX)
+17. **Exportación a Excel** (soporte adicional para formato XLSX)
 
 ---
 
