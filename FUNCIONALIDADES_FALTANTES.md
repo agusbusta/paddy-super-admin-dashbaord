@@ -269,10 +269,12 @@
 12. ✅ **Historial de Notificaciones** (ver historial de notificaciones masivas enviadas con detalles)
 13. ✅ **Gestión de Matches** (ver partidos completados con filtros y detalles)
 
+### ✅ COMPLETADO (Continuación)
+14. ✅ **Filtros en historial de notificaciones** (filtrar por fecha, categoría)
+15. ✅ **Exportar matches a CSV** (agregar exportación de partidos)
+
 ### 🟡 Baja Prioridad
-14. **Exportación a Excel** (soporte adicional para formato XLSX)
-15. **Filtros en historial de notificaciones** (filtrar por fecha, categoría, etc.)
-16. **Exportar matches a CSV** (agregar exportación de partidos)
+16. **Exportación a Excel** (soporte adicional para formato XLSX)
 
 ---
 
