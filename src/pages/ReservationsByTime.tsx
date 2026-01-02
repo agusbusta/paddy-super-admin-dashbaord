@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Typography,
   Container,
@@ -11,16 +11,30 @@ import {
   Divider,
   CircularProgress,
   Alert,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Paper,
+  Collapse,
+  InputAdornment,
+  Pagination,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
   SportsHandball as SportsIcon,
   AccessTime as AccessTimeIcon,
   Business as BusinessIcon,
+  FilterList as FilterListIcon,
+  Search as SearchIcon,
+  Clear as ClearIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { pregameTurnService } from '../services/pregameTurns';
+import { clubService } from '../services/clubs';
 import { colors } from '../utils/constants';
 
 // Tipo para los datos de reserva
@@ -115,29 +129,211 @@ const groupReservationsByTime = (reservations: Reservation[]) => {
 
 export const ReservationsByTime: React.FC = () => {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterClub, setFilterClub] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterStartDate, setFilterStartDate] = useState<string>('');
+  const [filterEndDate, setFilterEndDate] = useState<string>('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const { data: reservations = [], isLoading, error } = useQuery(
     'all-reservations',
-    () => pregameTurnService.getPregameTurns({ limit: 1000 }),
+    () => pregameTurnService.getPregameTurns({ limit: 10000 }),
     {
       refetchOnWindowFocus: false,
     }
   );
 
+  const { data: clubs = [] } = useQuery(
+    'clubs',
+    () => clubService.getClubs({ limit: 1000 }),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  // Filtrar reservas
+  const filteredReservations = React.useMemo(() => {
+    return reservations.filter((reservation) => {
+      // Búsqueda por texto
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const matchesSearch =
+          (reservation.club_name && reservation.club_name.toLowerCase().includes(searchLower)) ||
+          (reservation.court_name && reservation.court_name.toLowerCase().includes(searchLower)) ||
+          (reservation.start_time && reservation.start_time.toLowerCase().includes(searchLower));
+        if (!matchesSearch) return false;
+      }
+
+      // Filtro por club
+      if (filterClub && reservation.club_name !== filterClub) return false;
+
+      // Filtro por status
+      if (filterStatus !== 'all' && reservation.status !== filterStatus) return false;
+
+      // Filtro por fecha
+      if (filterStartDate && reservation.date < filterStartDate) return false;
+      if (filterEndDate && reservation.date > filterEndDate) return false;
+
+      return true;
+    });
+  }, [reservations, searchTerm, filterClub, filterStatus, filterStartDate, filterEndDate]);
+
   const groupedReservations = React.useMemo(() => {
-    return groupReservationsByTime(reservations);
-  }, [reservations]);
+    return groupReservationsByTime(filteredReservations);
+  }, [filteredReservations]);
+
+  // Paginación
+  const totalTimeSlots = groupedReservations.length;
+  const paginatedTimeSlots = groupedReservations.slice(
+    page * rowsPerPage,
+    (page + 1) * rowsPerPage
+  );
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setFilterClub('');
+    setFilterStatus('all');
+    setFilterStartDate('');
+    setFilterEndDate('');
+    setPage(0);
+  };
+
+  const handleChangePage = (event: React.ChangeEvent<unknown>, newPage: number) => {
+    setPage(newPage - 1);
+  };
 
   return (
     <Container maxWidth="xl">
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <IconButton onClick={() => navigate('/reservations')} sx={{ mr: 2 }}>
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h4" component="h1" fontWeight="bold">
-          Reservas por Horario
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton onClick={() => navigate('/reservations')} sx={{ mr: 2 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h4" component="h1" fontWeight="bold">
+            Reservas por Horario
+          </Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          {filteredReservations.length} reservas encontradas
         </Typography>
       </Box>
+
+      {/* Barra de búsqueda y filtros */}
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
+          <TextField
+            size="small"
+            placeholder="Buscar por club, cancha o horario..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(0);
+            }}
+            sx={{ flexGrow: 1, minWidth: 250 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm && (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => setSearchTerm('')}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Button
+            variant={showFilters ? 'contained' : 'outlined'}
+            startIcon={<FilterListIcon />}
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            Filtros
+          </Button>
+          {(filterClub || filterStatus !== 'all' || filterStartDate || filterEndDate || searchTerm) && (
+            <Button variant="outlined" onClick={clearFilters} startIcon={<ClearIcon />}>
+              Limpiar
+            </Button>
+          )}
+        </Box>
+
+        <Collapse in={showFilters}>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Club</InputLabel>
+                <Select
+                  value={filterClub}
+                  label="Club"
+                  onChange={(e) => {
+                    setFilterClub(e.target.value);
+                    setPage(0);
+                  }}
+                >
+                  <MenuItem value="">Todos</MenuItem>
+                  {clubs.map((club) => (
+                    <MenuItem key={club.id} value={club.name}>
+                      {club.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Estado</InputLabel>
+                <Select
+                  value={filterStatus}
+                  label="Estado"
+                  onChange={(e) => {
+                    setFilterStatus(e.target.value);
+                    setPage(0);
+                  }}
+                >
+                  <MenuItem value="all">Todos</MenuItem>
+                  <MenuItem value="PENDING">Pendiente</MenuItem>
+                  <MenuItem value="READY_TO_PLAY">Listo para jugar</MenuItem>
+                  <MenuItem value="COMPLETED">Completo</MenuItem>
+                  <MenuItem value="CANCELLED">Cancelado</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                type="date"
+                label="Fecha desde"
+                value={filterStartDate}
+                onChange={(e) => {
+                  setFilterStartDate(e.target.value);
+                  setPage(0);
+                }}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                type="date"
+                label="Fecha hasta"
+                value={filterEndDate}
+                onChange={(e) => {
+                  setFilterEndDate(e.target.value);
+                  setPage(0);
+                }}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+          </Grid>
+        </Collapse>
+      </Paper>
 
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -145,23 +341,38 @@ export const ReservationsByTime: React.FC = () => {
         </Box>
       ) : error ? (
         <Alert severity="error">Error al cargar las reservas</Alert>
-      ) : groupedReservations.length === 0 ? (
-        <Alert severity="info">No hay reservas registradas</Alert>
+      ) : paginatedTimeSlots.length === 0 ? (
+        <Alert severity="info">No hay reservas con los filtros aplicados</Alert>
       ) : (
-        groupedReservations.map(([time, timeReservations]) => (
-          <Box key={time} sx={{ mb: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <AccessTimeIcon sx={{ color: colors.primary }} />
-              <Typography variant="h6" fontWeight="bold">
-                {time} ({timeReservations.length} reservas)
-              </Typography>
+        <>
+          {paginatedTimeSlots.map(([time, timeReservations]) => (
+            <Box key={time} sx={{ mb: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <AccessTimeIcon sx={{ color: colors.primary }} />
+                <Typography variant="h6" fontWeight="bold">
+                  {time} ({timeReservations.length} reservas)
+                </Typography>
+              </Box>
+              <Divider sx={{ mb: 2 }} />
+              {timeReservations.map((reservation) => (
+                <ReservationCard key={reservation.id} reservation={reservation} />
+              ))}
             </Box>
-            <Divider sx={{ mb: 2 }} />
-            {timeReservations.map((reservation) => (
-              <ReservationCard key={reservation.id} reservation={reservation} />
-            ))}
-          </Box>
-        ))
+          ))}
+          {totalTimeSlots > rowsPerPage && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+              <Pagination
+                count={Math.ceil(totalTimeSlots / rowsPerPage)}
+                page={page + 1}
+                onChange={handleChangePage}
+                color="primary"
+                size="large"
+                showFirstButton
+                showLastButton
+              />
+            </Box>
+          )}
+        </>
       )}
     </Container>
   );

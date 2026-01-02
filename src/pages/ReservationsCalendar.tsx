@@ -12,19 +12,32 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Collapse,
+  InputAdornment,
 } from '@mui/material';
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Today as TodayIcon,
+  FilterList as FilterListIcon,
+  Clear as ClearIcon,
 } from '@mui/icons-material';
 import { useQuery } from 'react-query';
 import { pregameTurnService } from '../services/pregameTurns';
+import { clubService } from '../services/clubs';
 import { colors } from '../utils/constants';
 
 export const ReservationsCalendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [filterClub, setFilterClub] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [showFilters, setShowFilters] = useState(false);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -34,6 +47,14 @@ export const ReservationsCalendar: React.FC = () => {
   const lastDay = new Date(year, month + 1, 0);
   const daysInMonth = lastDay.getDate();
   const startingDayOfWeek = firstDay.getDay();
+
+  const { data: clubs = [] } = useQuery(
+    'clubs',
+    () => clubService.getClubs({ limit: 1000 }),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
   // Obtener reservas para el mes actual
   const { data: reservations = [], isLoading } = useQuery(
@@ -53,6 +74,19 @@ export const ReservationsCalendar: React.FC = () => {
     }
   );
 
+  // Filtrar reservas
+  const filteredReservations = React.useMemo(() => {
+    return reservations.filter((reservation: any) => {
+      // Filtro por club
+      if (filterClub && reservation.club_name !== filterClub) return false;
+
+      // Filtro por status
+      if (filterStatus !== 'all' && reservation.status !== filterStatus) return false;
+
+      return true;
+    });
+  }, [reservations, filterClub, filterStatus]);
+
   const goToPreviousMonth = () => {
     setCurrentDate(new Date(year, month - 1, 1));
   };
@@ -68,11 +102,16 @@ export const ReservationsCalendar: React.FC = () => {
 
   const getReservationsForDate = (date: Date): any[] => {
     const dateStr = date.toISOString().split('T')[0];
-    return reservations.filter((r: any) => {
+    return filteredReservations.filter((r: any) => {
       if (!r.date) return false;
       const resDate = new Date(r.date).toISOString().split('T')[0];
       return resDate === dateStr;
     });
+  };
+
+  const clearFilters = () => {
+    setFilterClub('');
+    setFilterStatus('all');
   };
 
   const monthNames = [
