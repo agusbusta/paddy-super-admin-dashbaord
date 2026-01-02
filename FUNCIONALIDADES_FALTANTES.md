@@ -351,21 +351,26 @@
 18. ✅ **Paginación** en listas grandes (implementada en Users, Clubs y Matches)
 
 ### ✅ COMPLETADO (Continuación)
-19. ✅ **Filtros adicionales por región/ciudad** (filtros por ciudad y provincia en usuarios)
+19. ✅ **Filtros adicionales por región/ciudad** (filtros por ciudad y provincia en usuarios usando API Georef del gobierno argentino)
 
 ### ✅ COMPLETADO (Continuación)
 20. ✅ **Filtro por tipo de partido mixto/regular** (filtro en página de Matches)
 
 ### 🟡 Mejoras Futuras (Baja Prioridad)
 1. **Gráficos adicionales en dashboard:**
-3. **Gráficos adicionales en dashboard:**
    - Turnos por día/club (si se decide incluir)
    - Tasa de cancelación
    - Distribución de categorías
-4. **Vista detallada de canchas** por club
-5. **Estadísticas específicas:**
+   - Gráfico de usuarios por provincia/ciudad
+2. **Vista detallada de canchas** por club
+3. **Estadísticas específicas:**
    - Clubs por región/ciudad
    - Canchas totales por club
+   - Mapa de distribución geográfica de usuarios
+4. **Mejoras de UX:**
+   - Búsqueda global en todas las secciones
+   - Filtros guardados/predefinidos
+   - Vista de calendario para reservas
 
 ---
 
