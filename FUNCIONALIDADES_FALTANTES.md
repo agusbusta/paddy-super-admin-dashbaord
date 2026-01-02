@@ -350,9 +350,11 @@
 ### ✅ COMPLETADO (Continuación)
 18. ✅ **Paginación** en listas grandes (implementada en Users, Clubs y Matches)
 
+### ✅ COMPLETADO (Continuación)
+19. ✅ **Filtros adicionales por región/ciudad** (filtros por ciudad y provincia en usuarios)
+
 ### 🟡 Mejoras Futuras (Baja Prioridad)
 1. **Filtros adicionales:**
-   - Por región/ciudad (usuarios)
    - Por tipo de partido mixto/regular (matches)
 3. **Gráficos adicionales en dashboard:**
    - Turnos por día/club (si se decide incluir)
