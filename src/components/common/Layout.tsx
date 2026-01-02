@@ -14,7 +14,13 @@ import {
   useMediaQuery,
   useTheme,
   Avatar,
-  Divider
+  Divider,
+  TextField,
+  InputAdornment,
+  Paper,
+  Menu,
+  MenuItem,
+  ClickAwayListener
 } from '@mui/material';
 import { 
   Dashboard as DashboardIcon, 
@@ -24,7 +30,8 @@ import {
   Place as PlaceIcon,
   EventNote as EventIcon,
   Notifications as NotificationsIcon,
-  SportsTennis as SportsIcon
+  SportsTennis as SportsIcon,
+  Search as SearchIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -43,6 +50,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [globalSearch, setGlobalSearch] = React.useState('');
+  const [searchMenuAnchor, setSearchMenuAnchor] = React.useState<null | HTMLElement>(null);
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
@@ -159,9 +168,90 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold', mr: 2 }}>
             Paddio | Super Admin Dashboard
           </Typography>
+          <TextField
+            size="small"
+            placeholder="Búsqueda global..."
+            value={globalSearch}
+            onChange={(e) => {
+              setGlobalSearch(e.target.value);
+              if (e.target.value) {
+                setSearchMenuAnchor(e.currentTarget);
+              } else {
+                setSearchMenuAnchor(null);
+              }
+            }}
+            onClick={(e) => {
+              if (globalSearch) {
+                setSearchMenuAnchor(e.currentTarget);
+              }
+            }}
+            sx={{
+              flexGrow: 1,
+              maxWidth: 400,
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: colors.background,
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: colors.textSecondary }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Menu
+            anchorEl={searchMenuAnchor}
+            open={Boolean(searchMenuAnchor)}
+            onClose={() => setSearchMenuAnchor(null)}
+            PaperProps={{
+              sx: {
+                mt: 1,
+                minWidth: 300,
+                maxWidth: 400,
+              },
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                navigate('/users');
+                setSearchMenuAnchor(null);
+                setGlobalSearch('');
+              }}
+            >
+              <ListItemIcon>
+                <PeopleIcon />
+              </ListItemIcon>
+              <ListItemText primary="Buscar en Usuarios" secondary={globalSearch} />
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate('/clubs');
+                setSearchMenuAnchor(null);
+                setGlobalSearch('');
+              }}
+            >
+              <ListItemIcon>
+                <PlaceIcon />
+              </ListItemIcon>
+              <ListItemText primary="Buscar en Clubs" secondary={globalSearch} />
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate('/matches');
+                setSearchMenuAnchor(null);
+                setGlobalSearch('');
+              }}
+            >
+              <ListItemIcon>
+                <SportsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Buscar en Partidos" secondary={globalSearch} />
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 

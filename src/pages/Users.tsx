@@ -37,6 +37,7 @@ import {
   ListItemIcon,
   ListItemText,
   TablePagination,
+  Divider,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -59,6 +60,7 @@ import { userService, User, UserUpdate } from '../services/users';
 import { georefService } from '../services/georef';
 import { colors } from '../utils/constants';
 import { exportToCSV, exportToExcel, mapUsersForExport } from '../utils/export';
+import { filterStorage } from '../utils/filterStorage';
 import toast from 'react-hot-toast';
 
 type SortField = 'id' | 'name' | 'email' | 'category' | 'gender' | 'is_active';
@@ -85,6 +87,9 @@ export const Users: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [reservationsPage, setReservationsPage] = useState(0);
   const [reservationsRowsPerPage, setReservationsRowsPerPage] = useState(10);
+  const [savedFiltersMenuAnchor, setSavedFiltersMenuAnchor] = useState<null | HTMLElement>(null);
+  const [saveFilterDialogOpen, setSaveFilterDialogOpen] = useState(false);
+  const [filterName, setFilterName] = useState('');
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading, error, refetch } = useQuery(
@@ -270,6 +275,43 @@ export const Users: React.FC = () => {
     return sortDirection === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />;
   };
 
+  const getCurrentFilters = () => ({
+    searchTerm,
+    filterCategory,
+    filterGender,
+    filterActive,
+    filterProfileComplete,
+    filterCity,
+    filterProvince,
+  });
+
+  const saveCurrentFilter = () => {
+    if (!filterName.trim()) {
+      toast.error('Por favor ingresa un nombre para el filtro');
+      return;
+    }
+    const filters = getCurrentFilters();
+    filterStorage.saveFilter('users', filterName, filters);
+    toast.success(`Filtro "${filterName}" guardado`);
+    setFilterName('');
+    setSaveFilterDialogOpen(false);
+  };
+
+  const loadSavedFilter = (filterName: string) => {
+    const filters = filterStorage.loadFilter('users', filterName);
+    if (filters) {
+      setSearchTerm(filters.searchTerm || '');
+      setFilterCategory(filters.filterCategory || '');
+      setFilterGender(filters.filterGender || '');
+      setFilterActive(filters.filterActive || 'all');
+      setFilterProfileComplete(filters.filterProfileComplete || 'all');
+      setFilterCity(filters.filterCity || '');
+      setFilterProvince(filters.filterProvince || '');
+      toast.success(`Filtro "${filterName}" cargado`);
+      setSavedFiltersMenuAnchor(null);
+    }
+  };
+
   const clearFilters = () => {
     setSearchTerm('');
     setFilterCategory('');
@@ -438,6 +480,37 @@ export const Users: React.FC = () => {
             >
               Filtros
             </Button>
+            <Button
+              variant="outlined"
+              onClick={(e) => setSavedFiltersMenuAnchor(e.currentTarget)}
+            >
+              Filtros Guardados ({filterStorage.getSavedFilters('users').length})
+            </Button>
+            <Menu
+              anchorEl={savedFiltersMenuAnchor}
+              open={Boolean(savedFiltersMenuAnchor)}
+              onClose={() => setSavedFiltersMenuAnchor(null)}
+            >
+              {filterStorage.getSavedFilters('users').length === 0 ? (
+                <MenuItem disabled>No hay filtros guardados</MenuItem>
+              ) : (
+                filterStorage.getSavedFilters('users').map((saved) => (
+                  <MenuItem
+                    key={saved.name}
+                    onClick={() => loadSavedFilter(saved.name)}
+                  >
+                    {saved.name}
+                  </MenuItem>
+                ))
+              )}
+              <Divider />
+              <MenuItem onClick={() => {
+                setSaveFilterDialogOpen(true);
+                setSavedFiltersMenuAnchor(null);
+              }}>
+                Guardar filtros actuales...
+              </MenuItem>
+            </Menu>
             {(filterCategory || filterGender || filterActive !== 'all' || filterProfileComplete !== 'all' || filterCity || filterProvince) && (
               <Button variant="outlined" onClick={clearFilters}>
                 Limpiar
@@ -1107,6 +1180,33 @@ export const Users: React.FC = () => {
               Editar Usuario
             </Button>
           )}
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog para guardar filtro */}
+      <Dialog open={saveFilterDialogOpen} onClose={() => setSaveFilterDialogOpen(false)}>
+        <DialogTitle>Guardar Filtros</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Nombre del filtro"
+            fullWidth
+            variant="outlined"
+            value={filterName}
+            onChange={(e) => setFilterName(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                saveCurrentFilter();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSaveFilterDialogOpen(false)}>Cancelar</Button>
+          <Button onClick={saveCurrentFilter} variant="contained" color="primary">
+            Guardar
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>

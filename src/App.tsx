@@ -16,6 +16,7 @@ import { Matches } from './pages/Matches';
 import { Reservations } from './pages/Reservations';
 import { ReservationsByClub } from './pages/ReservationsByClub';
 import { ReservationsByTime } from './pages/ReservationsByTime';
+import { ReservationsCalendar } from './pages/ReservationsCalendar';
 import { colors } from './utils/constants';
 
 // Crear un tema con los colores de la app móvil
@@ -213,6 +214,14 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <ReservationsByTime />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reservations-calendar"
+        element={
+          <ProtectedRoute>
+            <ReservationsCalendar />
           </ProtectedRoute>
         }
       />

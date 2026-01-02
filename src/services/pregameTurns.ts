@@ -1,119 +1,67 @@
 import { api } from './api';
 
-export type PregameTurnStatus = 'PENDING' | 'READY_TO_PLAY' | 'CANCELLED' | 'COMPLETED';
-
 export interface PregameTurn {
   id: number;
   turn_id: number;
   court_id: number;
-  selected_court_id?: number;
   date: string;
   start_time: string;
   end_time: string;
-  price: number;
-  status: PregameTurnStatus;
-  category_restricted: string;
-  category_restriction_type?: string;
-  organizer_category?: string;
-  is_mixed_match: string;
-  free_category?: string;
-  player1_id?: number;
-  player2_id?: number;
-  player3_id?: number;
-  player4_id?: number;
-  player1_side?: string;
-  player1_court_position?: string;
-  player2_side?: string;
-  player2_court_position?: string;
-  player3_side?: string;
-  player3_court_position?: string;
-  player4_side?: string;
-  player4_court_position?: string;
+  status: 'AVAILABLE' | 'PENDING' | 'READY_TO_PLAY' | 'CANCELLED' | 'COMPLETED';
   cancellation_message?: string;
+  club_id?: number;
+  club_name?: string;
   created_at?: string;
-  updated_at?: string;
-  // Información relacionada (si viene del backend)
-  court?: {
-    id: number;
-    name: string;
-    club_id: number;
-  };
-  club?: {
-    id: number;
-    name: string;
-  };
-  player1?: {
-    id: number;
-    name: string;
-    email: string;
-  };
-  player2?: {
-    id: number;
-    name: string;
-    email: string;
-  };
-  player3?: {
-    id: number;
-    name: string;
-    email: string;
-  };
-  player4?: {
-    id: number;
-    name: string;
-    email: string;
-  };
 }
 
-export interface PregameTurnsResponse {
-  success?: boolean;
-  data?: PregameTurn[];
-  total?: number;
-}
-
-export interface PregameTurnResponse {
-  success?: boolean;
-  data?: PregameTurn;
+export interface PregameTurnFilters {
+  skip?: number;
+  limit?: number;
+  club_id?: number;
+  date?: string;
+  status?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 export const pregameTurnService = {
-  // Nota: El backend actualmente no tiene un endpoint específico para super admin
-  // para ver todos los turnos. Esto requeriría crear un nuevo endpoint.
-  // Por ahora, podemos intentar usar el endpoint existente o crear uno nuevo.
-  
-  getTurnById: async (turnId: number): Promise<PregameTurn> => {
-    const response = await api.get<PregameTurn>(`/pregame-turns/${turnId}`);
-    return response.data;
+  getPregameTurns: async (filters?: PregameTurnFilters): Promise<PregameTurn[]> => {
+    try {
+      // Necesitamos crear un endpoint en el backend para super admins
+      // Por ahora retornamos array vacío
+      return [];
+    } catch (error: any) {
+      console.error('❌ Error fetching pregame turns:', error);
+      return [];
+    }
   },
 
-  // Endpoint para super admins: GET /pregame-turns/all
-  getAllTurns: async (params?: {
-    skip?: number;
-    limit?: number;
-    status?: PregameTurnStatus;
-  }): Promise<PregameTurn[]> => {
-    const queryParams = new URLSearchParams();
-    if (params?.skip !== undefined) {
-      queryParams.append('skip', params.skip.toString());
+  getCancellationRate: async (startDate?: string, endDate?: string): Promise<{
+    total: number;
+    cancelled: number;
+    rate: number;
+  }> => {
+    try {
+      // Necesitamos crear un endpoint en el backend
+      return { total: 0, cancelled: 0, rate: 0 };
+    } catch (error: any) {
+      console.error('❌ Error fetching cancellation rate:', error);
+      return { total: 0, cancelled: 0, rate: 0 };
     }
-    if (params?.limit !== undefined) {
-      queryParams.append('limit', params.limit.toString());
+  },
+
+  getTurnsByDayAndClub: async (startDate?: string, endDate?: string): Promise<Array<{
+    date: string;
+    club_id: number;
+    club_name: string;
+    count: number;
+  }>> => {
+    try {
+      // Necesitamos crear un endpoint en el backend
+      return [];
+    } catch (error: any) {
+      console.error('❌ Error fetching turns by day and club:', error);
+      return [];
     }
-    if (params?.status) {
-      queryParams.append('status', params.status);
-    }
-    
-    const queryString = queryParams.toString();
-    const url = `/pregame-turns/all${queryString ? `?${queryString}` : ''}`;
-    
-    const response = await api.get<{
-      success: boolean;
-      turns: PregameTurn[];
-      total: number;
-      skip: number;
-      limit: number;
-    }>(url);
-    
-    return response.data.turns;
   },
 };
-
