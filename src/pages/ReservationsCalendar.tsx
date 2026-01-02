@@ -140,15 +140,15 @@ export const ReservationsCalendar: React.FC = () => {
         <Grid item xs key={`prev-${i}`}>
           <Box
             sx={{
-              minHeight: 130,
-              p: 1.5,
-              border: '1px solid #e0e0e0',
-              backgroundColor: '#fafafa',
-              borderRadius: 2,
-              opacity: 0.5,
+              minHeight: 140,
+              p: 2,
+              border: '1px solid #e8eaf0',
+              background: 'linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%)',
+              borderRadius: 3,
+              opacity: 0.4,
             }}
           >
-            <Typography variant="body2" color="text.disabled" sx={{ fontSize: '0.9rem' }}>
+            <Typography variant="body2" color="text.disabled" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
               {date.getDate()}
             </Typography>
           </Box>
@@ -168,52 +168,68 @@ export const ReservationsCalendar: React.FC = () => {
           <Box
             onClick={() => setSelectedDate(date)}
             sx={{
-              minHeight: 130,
-              p: 1.5,
+              minHeight: 140,
+              p: 2,
               border: selected 
                 ? `2px solid ${colors.primary}` 
                 : today 
                 ? `2px solid ${colors.accent}` 
-                : '1px solid #e0e0e0',
-              backgroundColor: selected 
-                ? '#e3f2fd' 
+                : '1px solid #e8eaf0',
+              background: selected 
+                ? 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' 
                 : today 
-                ? '#fff3e0' 
-                : '#ffffff',
-              borderRadius: 2,
+                ? 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)' 
+                : 'linear-gradient(135deg, #ffffff 0%, #fafbfc 100%)',
+              borderRadius: 3,
               cursor: 'pointer',
-              transition: 'all 0.2s ease',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               position: 'relative',
+              boxShadow: selected 
+                ? '0 8px 24px rgba(26, 40, 66, 0.12)' 
+                : '0 2px 8px rgba(0, 0, 0, 0.04)',
               '&:hover': {
-                backgroundColor: selected 
-                  ? '#bbdefb' 
-                  : '#f5f5f5',
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 32px rgba(26, 40, 66, 0.16)',
                 borderColor: colors.primary,
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                background: selected 
+                  ? 'linear-gradient(135deg, #bbdefb 0%, #90caf9 100%)' 
+                  : 'linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%)',
               },
+              '&::before': selected ? {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 3,
+                background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
+                borderRadius: '3px 3px 0 0',
+              } : {},
             }}
           >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
               <Box
                 sx={{
-                  width: 28,
-                  height: 28,
+                  width: 32,
+                  height: 32,
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: selected 
-                    ? colors.primary 
+                  background: selected 
+                    ? `linear-gradient(135deg, ${colors.primary} 0%, #2c3e50 100%)` 
                     : today 
-                    ? colors.accent 
+                    ? `linear-gradient(135deg, ${colors.accent} 0%, #5a7fd4 100%)` 
                     : 'transparent',
                   color: (selected || today) ? 'white' : 'text.primary',
+                  boxShadow: (selected || today) ? '0 4px 12px rgba(0, 0, 0, 0.15)' : 'none',
+                  transition: 'all 0.3s ease',
                 }}
               >
                 <Typography
                   variant="body2"
                   fontWeight="bold"
-                  sx={{ fontSize: '0.9rem' }}
+                  sx={{ fontSize: '0.95rem' }}
                 >
                   {day}
                 </Typography>
@@ -223,29 +239,36 @@ export const ReservationsCalendar: React.FC = () => {
                   label={dayReservations.length}
                   size="small"
                   sx={{
-                    height: 20,
-                    minWidth: 20,
-                    fontSize: '0.65rem',
-                    backgroundColor: colors.primary,
+                    height: 22,
+                    minWidth: 22,
+                    fontSize: '0.7rem',
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, #2c3e50 100%)`,
                     color: 'white',
-                    fontWeight: 'bold',
+                    fontWeight: 700,
+                    boxShadow: '0 2px 8px rgba(26, 40, 66, 0.2)',
                     '& .MuiChip-label': {
-                      px: 0.5,
+                      px: 0.75,
                     },
                   }}
                 />
               )}
             </Box>
             {dayReservations.length > 0 && (
-              <Box sx={{ mt: 0.5 }}>
+              <Box sx={{ mt: 1 }}>
                 {dayReservations.slice(0, 2).map((res: any, idx: number) => (
                   <Box
                     key={idx}
                     sx={{
-                      mb: 0.5,
-                      p: 0.5,
-                      backgroundColor: '#f5f5f5',
-                      borderRadius: 0.5,
+                      mb: 0.75,
+                      p: 0.75,
+                      background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                      borderRadius: 1.5,
+                      border: '1px solid #e0e4e8',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%)',
+                        transform: 'translateX(2px)',
+                      },
                     }}
                   >
                     <Typography
@@ -257,7 +280,8 @@ export const ReservationsCalendar: React.FC = () => {
                         whiteSpace: 'nowrap',
                         color: 'text.secondary',
                         fontSize: '0.7rem',
-                        fontWeight: 500,
+                        fontWeight: 600,
+                        letterSpacing: '0.3px',
                       }}
                     >
                       {res.start_time || 'Reserva'}
@@ -273,6 +297,8 @@ export const ReservationsCalendar: React.FC = () => {
                       fontStyle: 'italic',
                       display: 'block',
                       mt: 0.5,
+                      fontWeight: 500,
+                      opacity: 0.7,
                     }}
                   >
                     +{dayReservations.length - 2} más
@@ -293,15 +319,15 @@ export const ReservationsCalendar: React.FC = () => {
         <Grid item xs key={`next-${day}`}>
           <Box
             sx={{
-              minHeight: 130,
-              p: 1.5,
-              border: '1px solid #e0e0e0',
-              backgroundColor: '#fafafa',
-              borderRadius: 2,
-              opacity: 0.5,
+              minHeight: 140,
+              p: 2,
+              border: '1px solid #e8eaf0',
+              background: 'linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%)',
+              borderRadius: 3,
+              opacity: 0.4,
             }}
           >
-            <Typography variant="body2" color="text.disabled" sx={{ fontSize: '0.9rem' }}>
+            <Typography variant="body2" color="text.disabled" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
               {date.getDate()}
             </Typography>
           </Box>
@@ -316,7 +342,15 @@ export const ReservationsCalendar: React.FC = () => {
 
   return (
     <Container maxWidth="xl">
-      <Paper elevation={0} sx={{ p: 3, borderRadius: 2, boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)' }}>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 4, 
+          borderRadius: 4, 
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+        }}
+      >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="h4" component="h1" fontWeight="bold">
             Calendario de Reservas
@@ -407,21 +441,23 @@ export const ReservationsCalendar: React.FC = () => {
           </Box>
         ) : (
           <>
-            <Grid container spacing={1} sx={{ mb: 2 }}>
+            <Grid container spacing={1.5} sx={{ mb: 3 }}>
               {dayNames.map((day) => (
                 <Grid item xs key={day}>
                   <Box
                     sx={{
-                      p: 1.5,
+                      p: 2,
                       textAlign: 'center',
-                      backgroundColor: colors.primary,
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, #2c3e50 100%)`,
                       color: 'white',
-                      fontWeight: 'bold',
+                      fontWeight: 600,
                       borderRadius: 2,
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      boxShadow: '0 4px 12px rgba(26, 40, 66, 0.15)',
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase',
                     }}
                   >
-                    <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.8rem', fontWeight: 600 }}>
                       {day}
                     </Typography>
                   </Box>
@@ -429,7 +465,7 @@ export const ReservationsCalendar: React.FC = () => {
               ))}
             </Grid>
 
-            <Grid container spacing={1}>
+            <Grid container spacing={1.5}>
               {renderCalendarDays()}
             </Grid>
 
