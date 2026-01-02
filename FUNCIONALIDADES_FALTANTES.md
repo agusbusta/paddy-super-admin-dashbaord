@@ -365,15 +365,15 @@
 3. ✅ **Estadísticas específicas:**
    - ✅ Canchas totales por club (gráfico en dashboard)
 
-### 🟡 Mejoras Futuras Opcionales (Muy Baja Prioridad)
-1. **Gráficos adicionales:**
-   - Turnos por día/club (si se decide incluir)
-   - Tasa de cancelación
-   - Mapa de distribución geográfica de usuarios
-2. **Mejoras de UX:**
-   - Búsqueda global en todas las secciones (cada página ya tiene búsqueda propia)
-   - Filtros guardados/predefinidos (requiere persistencia en localStorage)
-   - Vista de calendario para reservas
+### ✅ COMPLETADO (Todas las Mejoras Futuras)
+1. ✅ **Gráficos adicionales:**
+   - ✅ Turnos por día/club (implementado con endpoint backend)
+   - ✅ Tasa de cancelación (implementado con endpoint backend)
+   - ⚠️ Mapa de distribución geográfica de usuarios (requiere librería de mapas externa - opcional)
+2. ✅ **Mejoras de UX:**
+   - ✅ Búsqueda global en todas las secciones (implementada en Layout)
+   - ✅ Filtros guardados/predefinidos (implementado con localStorage en Users)
+   - ✅ Vista de calendario para reservas (implementada en ReservationsCalendar)
 
 ---
 

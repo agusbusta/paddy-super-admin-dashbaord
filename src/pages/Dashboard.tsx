@@ -91,6 +91,22 @@ export const Dashboard: React.FC = () => {
       staleTime: 1000 * 60 * 60, // Cache por 1 hora
     }
   );
+  const { data: cancellationRate = { total: 0, cancelled: 0, rate: 0 } } = useQuery(
+    'cancellation-rate',
+    () => statisticsService.getCancellationRate(),
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 60, // Cache por 1 hora
+    }
+  );
+  const { data: turnsByDayClub = [] } = useQuery(
+    'turns-by-day-club',
+    () => statisticsService.getTurnsByDayAndClub(),
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 60, // Cache por 1 hora
+    }
+  );
 
   const [chartFilter, setChartFilter] = React.useState<'todos' | 'jugadores' | 'administradores'>('todos');
 

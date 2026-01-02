@@ -27,9 +27,8 @@ export interface PregameTurnFilters {
 export const pregameTurnService = {
   getPregameTurns: async (filters?: PregameTurnFilters): Promise<PregameTurn[]> => {
     try {
-      // Necesitamos crear un endpoint en el backend para super admins
-      // Por ahora retornamos array vacío
-      return [];
+      const response = await api.get<PregameTurn[]>('/pregame-turns/', { params: filters });
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error: any) {
       console.error('❌ Error fetching pregame turns:', error);
       return [];
@@ -42,8 +41,11 @@ export const pregameTurnService = {
     rate: number;
   }> => {
     try {
-      // Necesitamos crear un endpoint en el backend
-      return { total: 0, cancelled: 0, rate: 0 };
+      const params: any = {};
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+      const response = await api.get('/statistics/turns/cancellation-rate', { params });
+      return response.data;
     } catch (error: any) {
       console.error('❌ Error fetching cancellation rate:', error);
       return { total: 0, cancelled: 0, rate: 0 };
@@ -57,8 +59,11 @@ export const pregameTurnService = {
     count: number;
   }>> => {
     try {
-      // Necesitamos crear un endpoint en el backend
-      return [];
+      const params: any = {};
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+      const response = await api.get('/statistics/turns/by-day-club', { params });
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error: any) {
       console.error('❌ Error fetching turns by day and club:', error);
       return [];

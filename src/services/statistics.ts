@@ -4,6 +4,7 @@ import { adminService } from './admin';
 import { matchService } from './matches';
 import { notificationService } from './notifications';
 import { courtService } from './courts';
+import { pregameTurnService } from './pregameTurns';
 
 export interface DashboardStatistics {
   users: {
@@ -312,6 +313,39 @@ export const statisticsService = {
         .sort((a, b) => b.courtsCount - a.courtsCount);
     } catch (error) {
       console.error('Error getting courts by club:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Obtener tasa de cancelación de turnos
+   */
+  getCancellationRate: async (startDate?: string, endDate?: string): Promise<{
+    total: number;
+    cancelled: number;
+    rate: number;
+  }> => {
+    try {
+      return await pregameTurnService.getCancellationRate(startDate, endDate);
+    } catch (error) {
+      console.error('Error getting cancellation rate:', error);
+      return { total: 0, cancelled: 0, rate: 0 };
+    }
+  },
+
+  /**
+   * Obtener turnos por día y club
+   */
+  getTurnsByDayAndClub: async (startDate?: string, endDate?: string): Promise<Array<{
+    date: string;
+    club_id: number;
+    club_name: string;
+    count: number;
+  }>> => {
+    try {
+      return await pregameTurnService.getTurnsByDayAndClub(startDate, endDate);
+    } catch (error) {
+      console.error('Error getting turns by day and club:', error);
       return [];
     }
   },
