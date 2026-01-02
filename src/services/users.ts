@@ -93,12 +93,21 @@ export const userService = {
 
   getUserReservations: async (userId: number): Promise<any[]> => {
     try {
-      const response = await api.get<any[]>('/bookings/', {
-        params: { user_id: userId, limit: 1000 },
-      });
-      return Array.isArray(response.data) ? response.data : [];
+      const response = await api.get<any>('/pregame-turns/user/' + userId + '/reservations');
+      console.log('🔍 User reservations response:', response.data);
+      
+      // El endpoint devuelve { user_id, reservations: [], total }
+      if (response.data && response.data.reservations) {
+        return Array.isArray(response.data.reservations) ? response.data.reservations : [];
+      }
+      
+      return [];
     } catch (error: any) {
       console.error('❌ Error fetching user reservations:', error);
+      if (error.response) {
+        console.error('❌ Error response:', error.response.data);
+        console.error('❌ Error status:', error.response.status);
+      }
       return [];
     }
   },

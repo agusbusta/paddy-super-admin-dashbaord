@@ -834,37 +834,77 @@ export const Users: React.FC = () => {
                       <TableRow>
                         <TableCell>ID</TableCell>
                         <TableCell>Fecha</TableCell>
-                        <TableCell>Estado</TableCell>
+                        <TableCell>Hora</TableCell>
                         <TableCell>Club</TableCell>
+                        <TableCell>Cancha</TableCell>
+                        <TableCell>Estado</TableCell>
+                        <TableCell>Jugadores</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {userReservations.map((reservation: any) => (
-                        <TableRow key={reservation.id}>
-                          <TableCell>{reservation.id}</TableCell>
-                          <TableCell>
-                            {reservation.created_at
-                              ? new Date(reservation.created_at).toLocaleDateString('es-AR')
-                              : '-'}
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={reservation.status || 'N/A'}
-                              size="small"
-                              color={
-                                reservation.status === 'CONFIRMED'
-                                  ? 'success'
-                                  : reservation.status === 'CANCELLED'
-                                  ? 'error'
-                                  : 'default'
-                              }
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {reservation.club_name || reservation.club_id || '-'}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {userReservations.map((reservation: any) => {
+                        const getStatusLabel = (status: string) => {
+                          switch (status) {
+                            case 'PENDING':
+                              return 'Pendiente';
+                            case 'READY_TO_PLAY':
+                              return 'Listo para Jugar';
+                            case 'CANCELLED':
+                              return 'Cancelado';
+                            case 'COMPLETED':
+                              return 'Completado';
+                            default:
+                              return status || 'N/A';
+                          }
+                        };
+
+                        const getStatusColor = (status: string) => {
+                          switch (status) {
+                            case 'READY_TO_PLAY':
+                              return 'success';
+                            case 'CANCELLED':
+                              return 'error';
+                            case 'PENDING':
+                              return 'warning';
+                            case 'COMPLETED':
+                              return 'info';
+                            default:
+                              return 'default';
+                          }
+                        };
+
+                        return (
+                          <TableRow key={reservation.id}>
+                            <TableCell>{reservation.id}</TableCell>
+                            <TableCell>
+                              {reservation.date
+                                ? new Date(reservation.date).toLocaleDateString('es-AR')
+                                : '-'}
+                            </TableCell>
+                            <TableCell>{reservation.start_time || '-'}</TableCell>
+                            <TableCell>{reservation.club_name || reservation.club_id || '-'}</TableCell>
+                            <TableCell>{reservation.court_name || reservation.court_id || '-'}</TableCell>
+                            <TableCell>
+                              <Chip
+                                label={getStatusLabel(reservation.status)}
+                                size="small"
+                                color={getStatusColor(reservation.status) as any}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              {reservation.players_count || 0}/4
+                              {reservation.is_mixed_match && (
+                                <Chip
+                                  label="Mixto"
+                                  size="small"
+                                  sx={{ ml: 0.5 }}
+                                  color="secondary"
+                                />
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </TableContainer>
