@@ -69,7 +69,8 @@ export const ReservationsCalendar: React.FC = () => {
   const getReservationsForDate = (date: Date): any[] => {
     const dateStr = date.toISOString().split('T')[0];
     return reservations.filter((r: any) => {
-      const resDate = r.date ? new Date(r.date).toISOString().split('T')[0] : null;
+      if (!r.date) return false;
+      const resDate = new Date(r.date).toISOString().split('T')[0];
       return resDate === dateStr;
     });
   };
@@ -294,28 +295,39 @@ export const ReservationsCalendar: React.FC = () => {
                   <Alert severity="info">No hay reservas para esta fecha.</Alert>
                 ) : (
                   <Grid container spacing={2}>
-                    {selectedDateReservations.map((res: any, idx: number) => (
-                      <Grid item xs={12} sm={6} md={4} key={idx}>
+                    {selectedDateReservations.map((res: any) => (
+                      <Grid item xs={12} sm={6} md={4} key={res.id}>
                         <Card>
                           <CardContent>
                             <Typography variant="subtitle1" fontWeight="bold">
-                              {res.club_name || 'Club'}
+                              {res.club_name || 'Sin club'}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {res.start_time} - {res.end_time}
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                              {res.court_name || 'Sin cancha'}
                             </Typography>
-                            <Chip
-                              label={res.status}
-                              size="small"
-                              sx={{ mt: 1 }}
-                              color={
-                                res.status === 'READY_TO_PLAY'
-                                  ? 'success'
-                                  : res.status === 'PENDING'
-                                  ? 'warning'
-                                  : 'default'
-                              }
-                            />
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                              {res.start_time} {res.end_time ? `- ${res.end_time}` : ''}
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, mt: 1, alignItems: 'center' }}>
+                              <Chip
+                                label={res.status === 'READY_TO_PLAY' ? 'Listo' : res.status === 'PENDING' ? 'Pendiente' : res.status === 'CANCELLED' ? 'Cancelado' : res.status}
+                                size="small"
+                                color={
+                                  res.status === 'READY_TO_PLAY'
+                                    ? 'success'
+                                    : res.status === 'PENDING'
+                                    ? 'warning'
+                                    : res.status === 'CANCELLED'
+                                    ? 'error'
+                                    : 'default'
+                                }
+                              />
+                              {res.players_count !== undefined && (
+                                <Typography variant="caption" color="text.secondary">
+                                  {res.players_count}/4
+                                </Typography>
+                              )}
+                            </Box>
                           </CardContent>
                         </Card>
                       </Grid>
