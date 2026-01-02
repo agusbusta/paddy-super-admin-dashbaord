@@ -185,12 +185,21 @@ export const ReservationsByTime: React.FC = () => {
     return groupReservationsByTime(filteredReservations);
   }, [filteredReservations]);
 
-  // Paginación
+  // Estado de paginación por horario
+  const [timeSlotPages, setTimeSlotPages] = React.useState<{ [timeSlot: string]: number }>({});
+  const reservationsPerTimeSlotPage = 10;
+
+  // Paginación de horarios
   const totalTimeSlots = groupedReservations.length;
   const paginatedTimeSlots = groupedReservations.slice(
     page * rowsPerPage,
     (page + 1) * rowsPerPage
   );
+
+  const getTimeSlotPage = (timeSlot: string) => timeSlotPages[timeSlot] || 0;
+  const setTimeSlotPage = (timeSlot: string, newPage: number) => {
+    setTimeSlotPages((prev) => ({ ...prev, [timeSlot]: newPage }));
+  };
 
   const clearFilters = () => {
     setSearchTerm('');
