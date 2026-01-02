@@ -56,6 +56,7 @@ import {
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { userService, User, UserUpdate } from '../services/users';
+import { georefService, Provincia, Localidad } from '../services/georef';
 import { colors } from '../utils/constants';
 import { exportToCSV, exportToExcel, mapUsersForExport } from '../utils/export';
 import toast from 'react-hot-toast';
@@ -131,11 +132,34 @@ export const Users: React.FC = () => {
     }
   );
 
-  // Obtener valores únicos para los filtros
+  // Obtener valores únicos para los filtros (categorías y géneros de usuarios)
   const categories = Array.from(new Set(users.map(u => u.category).filter(Boolean))) as string[];
   const genders = Array.from(new Set(users.map(u => u.gender).filter(Boolean))) as string[];
-  const cities = Array.from(new Set(users.map(u => u.city).filter(Boolean))) as string[];
-  const provinces = Array.from(new Set(users.map(u => u.province).filter(Boolean))) as string[];
+  
+  // Cargar provincias y ciudades desde la API Georef
+  const { data: provincias = [], isLoading: loadingProvincias } = useQuery(
+    'provincias-argentina',
+    () => georefService.getProvincias(),
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 60 * 24, // Cache por 24 horas
+    }
+  );
+
+  const { data: localidades = [], isLoading: loadingLocalidades } = useQuery(
+    ['localidades-argentina', filterProvince],
+    () => {
+      if (!filterProvince) return Promise.resolve([]);
+      const provincia = provincias.find((p) => p.nombre === filterProvince);
+      if (!provincia) return Promise.resolve([]);
+      return georefService.getLocalidadesPorProvincia(provincia.id);
+    },
+    {
+      enabled: !!filterProvince && provincias.length > 0,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 60 * 24, // Cache por 24 horas
+    }
+  );
 
   const filteredUsers = users
     .filter((user) => {
@@ -482,6 +506,28 @@ export const Users: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth size="small">
+                    <InputLabel>Provincia</InputLabel>
+                    <Select
+                      value={filterProvince}
+                      label="Provincia"
+                      onChange={(e) => {
+                        setFilterProvince(e.target.value);
+                        setFilterCity(''); // Resetear ciudad al cambiar provincia
+                        setPage(0);
+                      }}
+                      disabled={loadingProvincias}
+                    >
+                      <MenuItem value="">Todas</MenuItem>
+                      {provincias.map((provincia) => (
+                        <MenuItem key={provincia.id} value={provincia.nombre}>
+                          {provincia.nombre}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth size="small">
                     <InputLabel>Ciudad</InputLabel>
                     <Select
                       value={filterCity}
@@ -490,31 +536,12 @@ export const Users: React.FC = () => {
                         setFilterCity(e.target.value);
                         setPage(0);
                       }}
+                      disabled={!filterProvince || loadingLocalidades}
                     >
                       <MenuItem value="">Todas</MenuItem>
-                      {cities.map((city) => (
-                        <MenuItem key={city} value={city}>
-                          {city}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Provincia</InputLabel>
-                    <Select
-                      value={filterProvince}
-                      label="Provincia"
-                      onChange={(e) => {
-                        setFilterProvince(e.target.value);
-                        setPage(0);
-                      }}
-                    >
-                      <MenuItem value="">Todas</MenuItem>
-                      {provinces.map((province) => (
-                        <MenuItem key={province} value={province}>
-                          {province}
+                      {localidades.map((localidad) => (
+                        <MenuItem key={localidad.id} value={localidad.nombre}>
+                          {localidad.nombre}
                         </MenuItem>
                       ))}
                     </Select>
