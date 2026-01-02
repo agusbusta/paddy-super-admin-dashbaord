@@ -353,9 +353,11 @@
 ### ✅ COMPLETADO (Continuación)
 19. ✅ **Filtros adicionales por región/ciudad** (filtros por ciudad y provincia en usuarios)
 
+### ✅ COMPLETADO (Continuación)
+20. ✅ **Filtro por tipo de partido mixto/regular** (filtro en página de Matches)
+
 ### 🟡 Mejoras Futuras (Baja Prioridad)
-1. **Filtros adicionales:**
-   - Por tipo de partido mixto/regular (matches)
+1. **Gráficos adicionales en dashboard:**
 3. **Gráficos adicionales en dashboard:**
    - Turnos por día/club (si se decide incluir)
    - Tasa de cancelación
