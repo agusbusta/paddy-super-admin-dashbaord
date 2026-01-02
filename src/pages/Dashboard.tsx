@@ -855,6 +855,7 @@ export const Dashboard: React.FC = () => {
               </Grid>
             )}
           </Paper>
+          </Grid>
         </Grid>
       </Box>
     </Container>
