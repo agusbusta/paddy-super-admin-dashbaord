@@ -6,12 +6,16 @@ export interface PregameTurn {
   court_id: number;
   date: string;
   start_time: string;
-  end_time: string;
+  end_time?: string;
   status: 'AVAILABLE' | 'PENDING' | 'READY_TO_PLAY' | 'CANCELLED' | 'COMPLETED';
   cancellation_message?: string;
   club_id?: number;
   club_name?: string;
+  court_name?: string;
+  players_count?: number;
+  is_mixed_match?: boolean;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface PregameTurnFilters {

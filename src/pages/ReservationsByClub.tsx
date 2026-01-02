@@ -20,8 +20,6 @@ import {
   Collapse,
   InputAdornment,
   Pagination,
-  FormControlLabel,
-  Switch,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -126,7 +124,7 @@ export const ReservationsByClub: React.FC = () => {
   const [filterEndDate, setFilterEndDate] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage] = useState(10);
 
   const { data: reservations = [], isLoading, error } = useQuery(
     'all-reservations',

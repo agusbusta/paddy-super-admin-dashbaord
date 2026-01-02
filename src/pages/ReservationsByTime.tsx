@@ -136,7 +136,7 @@ export const ReservationsByTime: React.FC = () => {
   const [filterEndDate, setFilterEndDate] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage] = useState(5);
 
   const { data: reservations = [], isLoading, error } = useQuery(
     'all-reservations',

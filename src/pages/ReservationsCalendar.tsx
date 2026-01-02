@@ -267,11 +267,29 @@ export const ReservationsCalendar: React.FC = () => {
   return (
     <Container maxWidth="xl">
       <Paper elevation={0} sx={{ p: 3, borderRadius: 2, boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="h4" component="h1" fontWeight="bold">
             Calendario de Reservas
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Button
+              variant={showFilters ? 'contained' : 'outlined'}
+              startIcon={<FilterListIcon />}
+              onClick={() => setShowFilters(!showFilters)}
+              size="small"
+            >
+              Filtros
+            </Button>
+            {(filterClub || filterStatus !== 'all') && (
+              <Button
+                variant="outlined"
+                onClick={clearFilters}
+                startIcon={<ClearIcon />}
+                size="small"
+              >
+                Limpiar
+              </Button>
+            )}
             <Button
               startIcon={<TodayIcon />}
               onClick={goToToday}
@@ -291,6 +309,47 @@ export const ReservationsCalendar: React.FC = () => {
             </IconButton>
           </Box>
         </Box>
+
+        {/* Panel de filtros */}
+        <Collapse in={showFilters}>
+          <Paper sx={{ p: 2, mb: 3, backgroundColor: colors.background }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Club</InputLabel>
+                  <Select
+                    value={filterClub}
+                    label="Club"
+                    onChange={(e) => setFilterClub(e.target.value)}
+                  >
+                    <MenuItem value="">Todos</MenuItem>
+                    {clubs.map((club) => (
+                      <MenuItem key={club.id} value={club.name}>
+                        {club.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Estado</InputLabel>
+                  <Select
+                    value={filterStatus}
+                    label="Estado"
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                  >
+                    <MenuItem value="all">Todos</MenuItem>
+                    <MenuItem value="PENDING">Pendiente</MenuItem>
+                    <MenuItem value="READY_TO_PLAY">Listo para jugar</MenuItem>
+                    <MenuItem value="COMPLETED">Completo</MenuItem>
+                    <MenuItem value="CANCELLED">Cancelado</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Collapse>
 
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
