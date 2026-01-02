@@ -82,6 +82,8 @@ export const Users: React.FC = () => {
   const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [reservationsPage, setReservationsPage] = useState(0);
+  const [reservationsRowsPerPage, setReservationsRowsPerPage] = useState(10);
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading, error, refetch } = useQuery(
@@ -213,6 +215,15 @@ export const Users: React.FC = () => {
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const handleReservationsPageChange = (event: unknown, newPage: number) => {
+    setReservationsPage(newPage);
+  };
+
+  const handleReservationsRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setReservationsRowsPerPage(parseInt(event.target.value, 10));
+    setReservationsPage(0);
   };
 
   const handleSort = (field: SortField) => {
@@ -937,21 +948,27 @@ export const Users: React.FC = () => {
                   Este usuario no tiene reservas registradas.
                 </Alert>
               ) : (
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Fecha</TableCell>
-                        <TableCell>Hora</TableCell>
-                        <TableCell>Club</TableCell>
-                        <TableCell>Cancha</TableCell>
-                        <TableCell>Estado</TableCell>
-                        <TableCell>Jugadores</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {userReservations.map((reservation: any) => {
+                <>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>ID</TableCell>
+                          <TableCell>Fecha</TableCell>
+                          <TableCell>Hora</TableCell>
+                          <TableCell>Club</TableCell>
+                          <TableCell>Cancha</TableCell>
+                          <TableCell>Estado</TableCell>
+                          <TableCell>Jugadores</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {userReservations
+                          .slice(
+                            reservationsPage * reservationsRowsPerPage,
+                            reservationsPage * reservationsRowsPerPage + reservationsRowsPerPage
+                          )
+                          .map((reservation: any) => {
                         const getStatusLabel = (status: string) => {
                           switch (status) {
                             case 'PENDING':
@@ -1014,9 +1031,21 @@ export const Users: React.FC = () => {
                           </TableRow>
                         );
                       })}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <TablePagination
+                    component="div"
+                    count={userReservations.length}
+                    page={reservationsPage}
+                    onPageChange={handleReservationsPageChange}
+                    rowsPerPage={reservationsRowsPerPage}
+                    onRowsPerPageChange={handleReservationsRowsPerPageChange}
+                    rowsPerPageOptions={[10, 25, 50]}
+                    labelRowsPerPage="Filas por página:"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
+                  />
+                </>
               )}
             </Box>
           )}
@@ -1026,6 +1055,8 @@ export const Users: React.FC = () => {
             onClick={() => {
               setDetailDialogOpen(false);
               setSelectedUser(null);
+              setReservationsPage(0);
+              setDetailTab(0);
             }}
           >
             Cerrar

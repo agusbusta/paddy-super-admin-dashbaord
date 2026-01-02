@@ -4,6 +4,7 @@ export interface MatchPlayer {
   id: number;
   name: string;
   email: string;
+  gender?: string;
 }
 
 export interface Match {

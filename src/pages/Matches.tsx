@@ -68,6 +68,7 @@ export const Matches: React.FC = () => {
   const [filterClub, setFilterClub] = useState<string>('');
   const [filterStartDate, setFilterStartDate] = useState<string>('');
   const [filterEndDate, setFilterEndDate] = useState<string>('');
+  const [filterMixedMatch, setFilterMixedMatch] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -89,6 +90,17 @@ export const Matches: React.FC = () => {
 
   const { data: clubs = [] } = useQuery('clubs', () => clubService.getClubs({ limit: 100 }));
 
+  // Función para determinar si un match es mixto basándose en los géneros de los jugadores
+  const isMixedMatch = (match: Match): boolean => {
+    if (!match.players || match.players.length < 2) return false;
+    const genders = match.players
+      .map((p) => p.gender)
+      .filter((g): g is string => !!g);
+    const hasMale = genders.some((g) => g.toLowerCase() === 'masculino');
+    const hasFemale = genders.some((g) => g.toLowerCase() === 'femenino');
+    return hasMale && hasFemale;
+  };
+
   const filteredMatches = matches.filter((match) => {
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
@@ -100,6 +112,14 @@ export const Matches: React.FC = () => {
         match.score?.toLowerCase().includes(searchLower);
       if (!matchesSearch) return false;
     }
+
+    // Filtro por tipo de partido (mixto/regular)
+    if (filterMixedMatch === 'mixed') {
+      if (!isMixedMatch(match)) return false;
+    } else if (filterMixedMatch === 'regular') {
+      if (isMixedMatch(match)) return false;
+    }
+
     return true;
   });
 
@@ -348,6 +368,23 @@ export const Matches: React.FC = () => {
                     size="small"
                     InputLabelProps={{ shrink: true }}
                   />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Tipo de Partido</InputLabel>
+                    <Select
+                      value={filterMixedMatch}
+                      label="Tipo de Partido"
+                      onChange={(e) => {
+                        setFilterMixedMatch(e.target.value);
+                        setPage(0);
+                      }}
+                    >
+                      <MenuItem value="all">Todos</MenuItem>
+                      <MenuItem value="mixed">Mixtos</MenuItem>
+                      <MenuItem value="regular">Regulares</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
               </Grid>
             </Paper>
