@@ -140,15 +140,16 @@ export const ReservationsCalendar: React.FC = () => {
         <Grid item xs key={`prev-${i}`}>
           <Box
             sx={{
-              minHeight: 100,
-              p: 1,
+              minHeight: 120,
+              p: 1.5,
               border: '1px solid',
-              borderColor: colors.background,
-              backgroundColor: colors.background,
-              opacity: 0.5,
+              borderColor: '#e0e0e0',
+              backgroundColor: '#f5f5f5',
+              borderRadius: 1,
+              opacity: 0.4,
             }}
           >
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="body2" color="text.disabled">
               {date.getDate()}
             </Typography>
           </Box>
@@ -168,26 +169,38 @@ export const ReservationsCalendar: React.FC = () => {
           <Box
             onClick={() => setSelectedDate(date)}
             sx={{
-              minHeight: 100,
-              p: 1,
-              border: '1px solid',
-              borderColor: selected ? colors.primary : colors.background,
-              backgroundColor: selected ? `${colors.primary}10` : 'transparent',
+              minHeight: 120,
+              p: 1.5,
+              border: '2px solid',
+              borderColor: selected 
+                ? colors.primary 
+                : today 
+                ? colors.accent 
+                : '#e0e0e0',
+              backgroundColor: selected 
+                ? `${colors.primary}15` 
+                : today 
+                ? `${colors.accent}10` 
+                : 'white',
+              borderRadius: 1,
               cursor: 'pointer',
+              transition: 'all 0.2s ease',
               '&:hover': {
-                backgroundColor: `${colors.primary}05`,
+                backgroundColor: selected 
+                  ? `${colors.primary}20` 
+                  : `${colors.primary}08`,
+                borderColor: colors.primary,
+                transform: 'translateY(-2px)',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
               },
-              ...(today && {
-                borderColor: colors.accent,
-                borderWidth: 2,
-              }),
             }}
           >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
               <Typography
-                variant="body2"
-                fontWeight={today ? 'bold' : 'normal'}
-                color={today ? colors.accent : 'text.primary'}
+                variant="body1"
+                fontWeight={today || selected ? 'bold' : 'normal'}
+                color={today ? colors.accent : selected ? colors.primary : 'text.primary'}
+                sx={{ fontSize: '1rem' }}
               >
                 {day}
               </Typography>
@@ -196,10 +209,11 @@ export const ReservationsCalendar: React.FC = () => {
                   label={dayReservations.length}
                   size="small"
                   sx={{
-                    height: 20,
+                    height: 22,
                     fontSize: '0.7rem',
                     backgroundColor: colors.primary,
                     color: 'white',
+                    fontWeight: 'bold',
                   }}
                 />
               )}
@@ -215,14 +229,20 @@ export const ReservationsCalendar: React.FC = () => {
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
-                      color: colors.textSecondary,
+                      color: 'text.secondary',
+                      fontSize: '0.75rem',
+                      mb: 0.25,
                     }}
                   >
                     {res.start_time || 'Reserva'}
                   </Typography>
                 ))}
                 {dayReservations.length > 2 && (
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography 
+                    variant="caption" 
+                    color="text.secondary"
+                    sx={{ fontSize: '0.7rem', fontStyle: 'italic' }}
+                  >
                     +{dayReservations.length - 2} más
                   </Typography>
                 )}
@@ -241,15 +261,16 @@ export const ReservationsCalendar: React.FC = () => {
         <Grid item xs key={`next-${day}`}>
           <Box
             sx={{
-              minHeight: 100,
-              p: 1,
+              minHeight: 120,
+              p: 1.5,
               border: '1px solid',
-              borderColor: colors.background,
-              backgroundColor: colors.background,
-              opacity: 0.5,
+              borderColor: '#e0e0e0',
+              backgroundColor: '#f5f5f5',
+              borderRadius: 1,
+              opacity: 0.4,
             }}
           >
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="body2" color="text.disabled">
               {date.getDate()}
             </Typography>
           </Box>
@@ -355,25 +376,26 @@ export const ReservationsCalendar: React.FC = () => {
           </Box>
         ) : (
           <>
-            <Grid container spacing={0.5} sx={{ mb: 3 }}>
+            <Grid container spacing={1} sx={{ mb: 3 }}>
               {dayNames.map((day) => (
                 <Grid item xs key={day}>
                   <Box
                     sx={{
-                      p: 1,
+                      p: 1.5,
                       textAlign: 'center',
                       backgroundColor: colors.primary,
                       color: 'white',
                       fontWeight: 'bold',
+                      borderRadius: 1,
                     }}
                   >
-                    <Typography variant="caption">{day}</Typography>
+                    <Typography variant="body2">{day}</Typography>
                   </Box>
                 </Grid>
               ))}
             </Grid>
 
-            <Grid container spacing={0.5}>
+            <Grid container spacing={1}>
               {renderCalendarDays()}
             </Grid>
 
