@@ -60,7 +60,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Clubes', icon: <PlaceIcon />, path: '/clubs' },
     { text: 'Notificaciones', icon: <NotificationsIcon />, path: '/notifications' },
     { text: 'Partidos', icon: <SportsIcon />, path: '/matches' },
-    { text: 'Reservas', icon: <EventIcon />, path: '/reservations' },
+    { text: 'Calendario de Reservas', icon: <EventIcon />, path: '/reservations-calendar' },
   ];
 
   const handleDrawerToggle = () => {

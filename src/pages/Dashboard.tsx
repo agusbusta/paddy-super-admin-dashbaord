@@ -543,6 +543,35 @@ export const Dashboard: React.FC = () => {
             </Paper>
           </Grid>
 
+          {/* Gráfico de Tasa de Cancelación */}
+          <Grid item xs={12} md={4}>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                borderRadius: 2, 
+                boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+                height: '100%',
+              }}
+            >
+              <Typography variant="h6" color={colors.primary} fontWeight="bold" gutterBottom>
+                Tasa de Cancelación
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="h3" fontWeight="bold" color={cancellationRate.rate > 20 ? colors.error : colors.success}>
+                  {cancellationRate.rate.toFixed(1)}%
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  {cancellationRate.cancelled} de {cancellationRate.total} turnos cancelados
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
+                  Últimos 30 días
+                </Typography>
+              </Box>
+            </Paper>
+          </Grid>
+
           {/* Estadísticas de Usuarios */}
           <Grid item xs={12} md={4}>
             <Paper 
