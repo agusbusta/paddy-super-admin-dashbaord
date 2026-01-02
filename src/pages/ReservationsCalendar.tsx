@@ -19,7 +19,7 @@ import {
   Today as TodayIcon,
 } from '@mui/icons-material';
 import { useQuery } from 'react-query';
-import { userService } from '../services/users';
+import { pregameTurnService } from '../services/pregameTurns';
 import { colors } from '../utils/constants';
 
 export const ReservationsCalendar: React.FC = () => {
