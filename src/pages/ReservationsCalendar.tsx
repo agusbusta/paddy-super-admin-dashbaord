@@ -160,7 +160,6 @@ export const ReservationsCalendar: React.FC = () => {
     // Días del mes actual
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      const dayReservations = getReservationsForDate(date);
       const today = isToday(date);
       const selected = isSelected(date);
 
