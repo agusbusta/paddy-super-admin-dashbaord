@@ -16,7 +16,6 @@ import {
   Avatar,
 } from '@mui/material';
 import {
-  People as PeopleIcon,
   Place as PlaceIcon,
   CheckCircle as CheckIcon,
   Person as PersonIcon,
@@ -164,14 +163,6 @@ export const Dashboard: React.FC = () => {
       color: colors.accent,
       bgColor: `${colors.accent}15`,
           subtitle: `${stats.clubs.active} activos`,
-        },
-        {
-          title: 'Administradores',
-          value: stats.admins.total,
-          icon: <PeopleIcon />,
-          color: colors.warning,
-          bgColor: `${colors.warning}15`,
-          subtitle: `${stats.admins.active} activos`,
         },
         {
           title: 'Nuevos (7 días)',
@@ -661,7 +652,7 @@ export const Dashboard: React.FC = () => {
             </Paper>
           </Grid>
 
-          {/* Estadísticas de Clubs y Administradores */}
+          {/* Estadísticas de Clubs */}
           <Grid item xs={12} md={6}>
             <Paper
               elevation={0}
@@ -673,7 +664,7 @@ export const Dashboard: React.FC = () => {
               }}
             >
               <Typography variant="h6" gutterBottom color={colors.primary} fontWeight="bold">
-                Clubs y Administradores
+                Clubs
               </Typography>
               <Divider sx={{ mb: 2 }} />
               {isLoading ? (
@@ -699,26 +690,6 @@ export const Dashboard: React.FC = () => {
                       </Box>
                       <Typography variant="body2" fontWeight="bold">
                         {stats.clubs.inactive}
-                      </Typography>
-                    </Box>
-                  )}
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <PeopleIcon sx={{ color: colors.warning, fontSize: 20, mr: 1 }} />
-                      <Typography variant="body2">Admins Activos:</Typography>
-                    </Box>
-                    <Typography variant="body2" fontWeight="bold">
-                      {stats.admins.active} / {stats.admins.total}
-                    </Typography>
-                  </Box>
-                  {stats.admins.inactive > 0 && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <PeopleIcon sx={{ color: colors.error, fontSize: 20, mr: 1 }} />
-                        <Typography variant="body2">Admins Inactivos:</Typography>
-                      </Box>
-                      <Typography variant="body2" fontWeight="bold">
-                        {stats.admins.inactive}
                       </Typography>
                     </Box>
                   )}

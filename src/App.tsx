@@ -8,7 +8,6 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import { Layout } from './components/common/Layout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
-import { AdminManagement } from './pages/AdminManagement';
 import { Users } from './pages/Users';
 import { Clubs } from './pages/Clubs';
 import { Notifications } from './pages/Notifications';
@@ -150,14 +149,6 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admins"
-        element={
-          <ProtectedRoute>
-            <AdminManagement />
           </ProtectedRoute>
         }
       />

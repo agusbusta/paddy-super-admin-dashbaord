@@ -37,7 +37,8 @@ export interface ClubCreate {
   saturday_open?: boolean;
   sunday_open?: boolean;
   courts_count?: number; // Número de canchas a crear (default 1)
-  admin_user_id?: number; // ID del administrador a asignar (opcional)
+  admin_name: string; // Nombre del administrador (se crea automáticamente)
+  admin_email: string; // Email del administrador (se crea automáticamente)
 }
 
 export interface ClubUpdate {
@@ -125,10 +126,9 @@ export const clubService = {
   },
 
   createClub: async (data: ClubCreate): Promise<Club> => {
-    const { courts_count, admin_user_id, ...clubData } = data;
+    const { courts_count, ...clubData } = data;
     const params: any = {};
     if (courts_count) params.courts_count = courts_count;
-    if (admin_user_id) params.admin_user_id = admin_user_id;
     const response = await api.post<Club>('/clubs/', clubData, { params });
     return response.data;
   },

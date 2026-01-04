@@ -1,6 +1,5 @@
 import { userService } from './users';
 import { clubService } from './clubs';
-import { adminService } from './admin';
 import { matchService } from './matches';
 import { notificationService } from './notifications';
 import { courtService } from './courts';
@@ -57,11 +56,14 @@ export const statisticsService = {
   getDashboardStatistics: async (): Promise<DashboardStatistics> => {
     try {
       // Obtener todos los datos necesarios
-      const [users, clubs, admins] = await Promise.all([
+      // Los admins se calculan desde los clubs (cada club tiene un admin)
+      const [users, clubs] = await Promise.all([
         userService.getUsers({ limit: 10000 }),
         clubService.getClubs({ limit: 1000 }),
-        adminService.getAdmins(),
       ]);
+
+      // Los admins son los clubs (cada club tiene un administrador)
+      const admins = clubs; // Mismo concepto
 
       // Calcular fechas
       const now = new Date();
@@ -87,9 +89,10 @@ export const statisticsService = {
       const activeClubs = clubs.filter((c) => c.is_active !== false);
       const inactiveClubs = clubs.filter((c) => c.is_active === false);
 
-      // Calcular estadísticas de admins
-      const activeAdmins = admins.filter((a) => a.is_active);
-      const inactiveAdmins = admins.filter((a) => !a.is_active);
+      // Los admins son los clubs (cada club tiene un administrador)
+      // El estado del admin es el mismo que el estado del club
+      const activeAdmins = activeClubs; // Los clubs activos tienen admins activos
+      const inactiveAdmins = inactiveClubs; // Los clubs inactivos tienen admins inactivos
 
       // Obtener estadísticas de matches
       let matchesStats = undefined;

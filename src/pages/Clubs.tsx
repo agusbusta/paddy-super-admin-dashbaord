@@ -28,10 +28,6 @@ import {
   DialogActions,
   FormControlLabel,
   Switch,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
   InputAdornment,
   Paper,
   Collapse,
@@ -59,8 +55,6 @@ import {
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { clubService, Club, ClubCreate, ClubUpdate } from '../services/clubs';
-import { adminService } from '../services/admin';
-import { Admin } from '../types/admin';
 import { courtService } from '../services/courts';
 import { colors } from '../utils/constants';
 import { exportToCSV, exportToExcel, mapClubsForExport } from '../utils/export';
@@ -395,24 +389,12 @@ const ClubFormDialog: React.FC<{
     saturday_open: true,
     sunday_open: true,
     courts_count: 1,
-    admin_user_id: undefined,
+    admin_name: '',
+    admin_email: '',
   });
   const [isActive, setIsActive] = useState(club?.is_active !== false);
-  const [activeStep, setActiveStep] = useState(0);
 
   const queryClient = useQueryClient();
-
-  // Obtener lista de administradores disponibles (solo para creación)
-  const { data: admins = [] } = useQuery<Admin[]>(
-    'admins',
-    adminService.getAdmins,
-    {
-      enabled: !club, // Solo cargar si estamos creando un club nuevo
-    }
-  );
-
-  // Filtrar administradores que no tengan club asignado
-  const availableAdmins = admins.filter((admin: Admin) => !admin.club_id && admin.is_active);
 
   const createMutation = useMutation(
     (data: ClubCreate) => clubService.createClub(data),
@@ -461,26 +443,35 @@ const ClubFormDialog: React.FC<{
         toast.error('Nombre y dirección son obligatorios');
         return;
       }
+      // Validar datos del administrador
+      if (!formData.admin_name || !formData.admin_email) {
+        toast.error('Nombre y email del administrador son obligatorios');
+        return;
+      }
+
       // Asegurar que los campos requeridos estén presentes
+      // Los horarios, precios y canchas se configurarán desde el dashboard de club
       const createData: ClubCreate = {
         name: formData.name!,
         address: formData.address!,
         phone: formData.phone,
         email: formData.email,
-        description: formData.description,
-        opening_time: formData.opening_time || '08:00:00',
-        closing_time: formData.closing_time || '22:00:00',
-        turn_duration_minutes: formData.turn_duration_minutes || 90,
-        price_per_turn: formData.price_per_turn || 0,
-        monday_open: formData.monday_open !== false,
-        tuesday_open: formData.tuesday_open !== false,
-        wednesday_open: formData.wednesday_open !== false,
-        thursday_open: formData.thursday_open !== false,
-        friday_open: formData.friday_open !== false,
-        saturday_open: formData.saturday_open !== false,
-        sunday_open: formData.sunday_open !== false,
-        courts_count: formData.courts_count || 1,
-        admin_user_id: formData.admin_user_id,
+        description: formData.description || '',
+        // Valores por defecto - el administrador los configurará después
+        opening_time: '08:00:00',
+        closing_time: '22:00:00',
+        turn_duration_minutes: 90,
+        price_per_turn: 0,
+        monday_open: true,
+        tuesday_open: true,
+        wednesday_open: true,
+        thursday_open: true,
+        friday_open: true,
+        saturday_open: true,
+        sunday_open: true,
+        courts_count: 0, // No crear canchas automáticamente - el admin las creará
+        admin_name: formData.admin_name!,
+        admin_email: formData.admin_email!,
       };
       createMutation.mutate(createData);
     }
@@ -495,7 +486,6 @@ const ClubFormDialog: React.FC<{
         email: club.email || '',
       });
       setIsActive(club.is_active !== false);
-      setActiveStep(0); // Solo un paso para edición
     } else {
       setFormData({
         name: '',
@@ -515,33 +505,14 @@ const ClubFormDialog: React.FC<{
         saturday_open: true,
         sunday_open: true,
         courts_count: 1,
+        admin_name: '',
+        admin_email: '',
       });
       setIsActive(true);
-      setActiveStep(0); // Resetear al primer paso
     }
   }, [club, open]);
 
-  const steps = club 
-    ? ['Información Básica'] 
-    : ['Información Básica', 'Horarios', 'Precio y Canchas'];
-
-  const handleNext = () => {
-    // Validar paso actual antes de avanzar
-    if (activeStep === 0) {
-      if (!formData.name || !formData.address) {
-        toast.error('Nombre y dirección son obligatorios');
-        return;
-      }
-    }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
   const handleClose = () => {
-    setActiveStep(0);
     onClose();
   };
 
@@ -551,13 +522,7 @@ const ClubFormDialog: React.FC<{
         {club ? 'Editar Club' : 'Nuevo Club'}
       </DialogTitle>
       <DialogContent>
-        <Box sx={{ mt: 2 }}>
-          <Stepper activeStep={activeStep} orientation="vertical">
-            {/* Paso 1: Información Básica */}
-            <Step>
-              <StepLabel>Información Básica</StepLabel>
-              <StepContent>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
             label="Nombre *"
             value={formData.name}
@@ -580,30 +545,33 @@ const ClubFormDialog: React.FC<{
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             fullWidth
           />
-          <TextField
-            label="Email"
-            value={formData.email || ''}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            fullWidth
-            type="email"
-            helperText="Email de contacto del club"
-          />
-          {!club && availableAdmins.length > 0 && (
-            <FormControl fullWidth>
-              <InputLabel>Administrador (Opcional)</InputLabel>
-              <Select
-                value={formData.admin_user_id || ''}
-                label="Administrador (Opcional)"
-                onChange={(e) => setFormData({ ...formData, admin_user_id: e.target.value ? Number(e.target.value) : undefined })}
-              >
-                <MenuItem value="">Sin asignar</MenuItem>
-                {availableAdmins.map((admin: any) => (
-                  <MenuItem key={admin.id} value={admin.id}>
-                    {admin.name} {admin.email ? `(${admin.email})` : ''}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          {!club && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+                Datos del Administrador
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Se creará automáticamente un administrador para este club
+              </Typography>
+              <TextField
+                label="Nombre del Administrador *"
+                value={formData.admin_name || ''}
+                onChange={(e) => setFormData({ ...formData, admin_name: e.target.value })}
+                fullWidth
+                required
+                helperText="Nombre completo del administrador del club"
+              />
+              <TextField
+                label="Email del Administrador *"
+                value={formData.admin_email || ''}
+                onChange={(e) => setFormData({ ...formData, admin_email: e.target.value })}
+                fullWidth
+                type="email"
+                required
+                helperText="Email que usará para iniciar sesión en el dashboard y será el email de contacto del club"
+              />
+            </>
           )}
           {club && (
                     <FormControlLabel
@@ -616,128 +584,6 @@ const ClubFormDialog: React.FC<{
                       label="Club Activo"
                     />
                   )}
-                </Box>
-                {!club && (
-                  <Box sx={{ mb: 2 }}>
-                    <Button
-                      variant="contained"
-                      onClick={handleNext}
-                      sx={{ mt: 1, mr: 1 }}
-                    >
-                      Siguiente
-                    </Button>
-                  </Box>
-                )}
-              </StepContent>
-            </Step>
-
-            {/* Paso 2: Horarios (solo para creación) */}
-            {!club && (
-              <Step>
-                <StepLabel>Horarios</StepLabel>
-                <StepContent>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
-                    <TextField
-                      label="Hora de Apertura"
-                value={formData.opening_time?.substring(0, 5) || '08:00'}
-                onChange={(e) => {
-                  const timeValue = e.target.value;
-                  // Convertir HH:MM a HH:MM:SS
-                  const timeWithSeconds = timeValue ? `${timeValue}:00` : '08:00:00';
-                  setFormData({ ...formData, opening_time: timeWithSeconds });
-                }}
-                fullWidth
-                type="time"
-                InputLabelProps={{ shrink: true }}
-                helperText="Formato: HH:MM (ej: 08:00)"
-              />
-              <TextField
-                label="Hora de Cierre"
-                value={formData.closing_time?.substring(0, 5) || '22:00'}
-                onChange={(e) => {
-                  const timeValue = e.target.value;
-                  // Convertir HH:MM a HH:MM:SS
-                  const timeWithSeconds = timeValue ? `${timeValue}:00` : '22:00:00';
-                  setFormData({ ...formData, closing_time: timeWithSeconds });
-                }}
-                fullWidth
-                type="time"
-                InputLabelProps={{ shrink: true }}
-                helperText="Formato: HH:MM (ej: 22:00)"
-              />
-              <TextField
-                label="Duración del Turno (minutos)"
-                value={formData.turn_duration_minutes}
-                onChange={(e) => setFormData({ ...formData, turn_duration_minutes: parseInt(e.target.value) || 90 })}
-                fullWidth
-                type="number"
-                      defaultValue={90}
-                    />
-                  </Box>
-                  <Box sx={{ mb: 2 }}>
-                    <Button
-                      onClick={handleBack}
-                      sx={{ mt: 1, mr: 1 }}
-                    >
-                      Atrás
-                    </Button>
-                    <Button
-                      variant="contained"
-                      onClick={handleNext}
-                      sx={{ mt: 1, mr: 1 }}
-                    >
-                      Siguiente
-                    </Button>
-                  </Box>
-                </StepContent>
-              </Step>
-            )}
-
-            {/* Paso 3: Precio y Canchas (solo para creación) */}
-            {!club && (
-              <Step>
-                <StepLabel>Precio y Canchas</StepLabel>
-                <StepContent>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
-                    <TextField
-                      label="Precio por Turno (pesos)"
-                value={formData.price_per_turn ? (formData.price_per_turn / 100).toString() : '0'}
-                onChange={(e) => {
-                  const pesos = parseFloat(e.target.value) || 0;
-                  // Convertir pesos a centavos para el backend
-                  const centavos = Math.round(pesos * 100);
-                  setFormData({ ...formData, price_per_turn: centavos });
-                }}
-                fullWidth
-                type="number"
-                inputProps={{ min: 0, step: 100 }}
-                helperText="Ingrese el precio en pesos (ej: 30000 para $30.000)"
-              />
-              <TextField
-                label="Cantidad de Canchas"
-                value={formData.courts_count || 1}
-                onChange={(e) => {
-                  const count = parseInt(e.target.value) || 1;
-                  setFormData({ ...formData, courts_count: Math.max(1, Math.min(20, count)) });
-                }}
-                fullWidth
-                type="number"
-                inputProps={{ min: 1, max: 20 }}
-                      helperText="Número de canchas a crear automáticamente (1-20)"
-                    />
-                  </Box>
-                  <Box sx={{ mb: 2 }}>
-                    <Button
-                      onClick={handleBack}
-                      sx={{ mt: 1, mr: 1 }}
-                    >
-                      Atrás
-                    </Button>
-                  </Box>
-                </StepContent>
-              </Step>
-            )}
-          </Stepper>
         </Box>
       </DialogContent>
       <DialogActions>
@@ -753,12 +599,12 @@ const ClubFormDialog: React.FC<{
           </Button>
         ) : (
           <Button 
-            onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext} 
+            onClick={handleSubmit} 
             variant="contained"
             disabled={createMutation.isLoading}
             sx={{ backgroundColor: colors.primary }}
           >
-            {createMutation.isLoading ? 'Guardando...' : activeStep === steps.length - 1 ? 'Crear' : 'Siguiente'}
+            {createMutation.isLoading ? 'Guardando...' : 'Crear'}
           </Button>
         )}
       </DialogActions>

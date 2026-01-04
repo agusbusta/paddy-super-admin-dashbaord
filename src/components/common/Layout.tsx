@@ -55,7 +55,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Administradores', icon: <PeopleIcon />, path: '/admins' },
     { text: 'Usuarios', icon: <PeopleIcon />, path: '/users' },
     { text: 'Clubes', icon: <PlaceIcon />, path: '/clubs' },
     { text: 'Notificaciones', icon: <NotificationsIcon />, path: '/notifications' },
